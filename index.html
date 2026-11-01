@@ -9,7 +9,6 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #333; }
-    
     #dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 16px; background: linear-gradient(135deg, #6d4aff 0%, #5a45e0 100%); color: white; }
     .stat-card { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 16px; backdrop-filter: blur(8px); }
     .stat-label { font-size: 12px; opacity: 0.9; margin-bottom: 6px; }
@@ -17,16 +16,13 @@
     .stat-delta { font-size: 13px; opacity: 0.85; margin-top: 4px; }
     .stat-delta.positive { color: #4ade80; }
     .stat-delta.neutral { color: #fbbf24; }
-    
     #map-container { padding: 0 16px; position: relative; }
     #map { width: 100%; height: 42vh; border-radius: 8px; overflow: hidden; z-index: 1; }
-    
     .map-controls { position: absolute; top: 10px; right: 10px; z-index: 800; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: calc(100% - 20px); }
     .map-btn { background: #fff; border: 1px solid #ddd; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .map-btn:hover { background: #f5f5f5; }
     .map-btn.active { background: #6d4aff; color: #fff; border-color: #6d4aff; }
     #drag-toggle.active { background: #f59e0b; border-color: #f59e0b; color: #fff; }
-    
     #mission-panel { padding: 14px 16px; background: #fff; border-bottom: 1px solid #ddd; }
     .mission-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
     .mission-input { flex: 1; min-width: 220px; }
@@ -36,12 +32,10 @@
     .mission-actions { display: flex; gap: 8px; }
     .route-info { font-size: 12px; color: #666; margin-top: 6px; padding: 8px; background: #f9fafb; border-radius: 4px; display: none; }
     .route-info.visible { display: block; }
-    
     button { font-family: inherit; cursor: pointer; }
     .btn-alarm { background: #e74c3c; color: #fff; padding: 10px 18px; border: none; border-radius: 6px; font-weight: 600; }
     .btn-alarm:hover { background: #c0392b; }
     .btn-cancel { background: #e0e0e0; color: #333; padding: 10px 18px; border: none; border-radius: 6px; }
-    
     #vehicle-panel { height: calc(28vh); display: flex; flex-direction: column; background: #fff; overflow: hidden; }
     .panel-header { padding: 11px 16px; background: #6d4aff; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .panel-header h2 { font-size: 17px; font-weight: 600; }
@@ -65,7 +59,6 @@
     .phone-number { font-size: 12px; color: #6d4aff; margin-left: 8px; font-weight: 500; }
     .vehicle-actions button { padding: 5px 9px; border: 1px solid #ccc; background: #fff; border-radius: 5px; font-size: 13px; }
     .vehicle-actions button:hover { background: #f5f5f5; }
-    
     #history-toggle { padding: 8px 16px; background: #374151; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
     #history-toggle:hover { background: #4b5563; }
     #history-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #fff; }
@@ -74,13 +67,11 @@
     .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .history-table th { text-align: left; padding: 10px 8px; background: #f9fafb; border-bottom: 2px solid #ddd; position: sticky; top: 0; }
     .history-table td { padding: 8px; border-bottom: 1px solid #eee; }
-    .history-table tr { cursor: pointer; }
     .history-table tr:hover { background: #f9fafb; }
     .btn-export { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; margin-right: auto; }
     .btn-export:hover { background: #2563eb; }
     .btn-reset { background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; }
     .btn-reset:hover { background: #b91c1c; }
-    
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1100; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: #fff; border-radius: 10px; padding: 22px; width: 92%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
@@ -94,22 +85,20 @@
     .btn-delete { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; }
     .btn-drill { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; margin-right: auto; }
     
-    .leaflet-marker-icon.custom-marker { background: transparent; border: none; padding: 0; margin: 0; overflow: visible; }
-    .marker-inner-wrapper { position: relative; width: 36px; height: 36px; transform: none !important; }
+    /* WICHTIG: Zoom-stabile Marker */
+    .marker-wrapper { position: relative; width: 36px; height: 36px; line-height: 1; overflow: visible; cursor: pointer; transform: none !important; }
     .marker-bg { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin-left: -17px; margin-top: -17px; background: rgba(255, 255, 255, 0.92); border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); pointer-events: none; }
     .marker-emoji { position: absolute; left: 0; top: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 25px; pointer-events: none; }
     .marker-emoji.truck { font-size: 27px; }
-    
     #map.drag-mode .marker-bg { border: 2px dashed #f59e0b; background: rgba(255, 251, 235, 0.95); }
-    #map.drag-mode .marker-inner-wrapper { cursor: grab; }
-    #map.drag-mode .marker-inner-wrapper:active { cursor: grabbing; }
-    
+    #map.drag-mode .marker-wrapper { cursor: grab; }
+    #map.drag-mode .marker-wrapper:active { cursor: grabbing; }
     @keyframes jumpInner { 0% { transform: translateY(0); } 40% { transform: translateY(-22px); } 70% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
     .jump-animation .marker-emoji { animation: jumpInner .65s ease; }
-    
     .drag-overlay { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); background: #6d4aff; color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; z-index: 850; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .drag-overlay.active { opacity: 1; }
     
+    /* Phase Badges & Chips */
     .phase-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin: 2px; }
     .phase-badge.alarm { background: #f59e0b; color: white; }
     .phase-badge.abfahrt { background: #3b82f6; color: white; }
@@ -124,6 +113,7 @@
     .note-meta { font-size: 11px; color: #666; margin-bottom: 4px; }
     .note-text { word-wrap: break-word; }
     
+    /* PIN Modal */
     .pin-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1150; align-items: center; justify-content: center; }
     .pin-modal-overlay.active { display: flex; }
     .pin-modal { background: #fff; border-radius: 10px; padding: 24px; width: 92%; max-width: 340px; text-align: center; }
@@ -138,777 +128,866 @@
     .pin-buttons { display: flex; gap: 10px; justify-content: center; }
     .pin-btn-confirm { background: #6d4aff; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; }
     .pin-btn-cancel { background: #e0e0e0; color: #333; border: none; padding: 10px 24px; border-radius: 6px; }
-    
     @media (max-width: 820px) { #map { height: 38vh; } #vehicle-panel { height: 24vh; } #history-scroll { height: 30vh; } .mission-controls { flex-direction: column; align-items: stretch; } .mission-select, .mission-actions { width: 100%; } .history-table { font-size: 11px; } .history-table th, .history-table td { padding: 6px 4px; } .map-btn { padding: 6px 9px; font-size: 12px; } }
   </style>
 </head>
 <body>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard">
-    <div class="stat-card"><div class="stat-label">🚒 Gesamtfahrzeuge</div><div class="stat-value" id="stat-total">0</div></div>
-    <div class="stat-card"><div class="stat-label">🟢 Einsatzbereit</div><div class="stat-value" id="stat-ready">0</div><div class="stat-delta positive" id="stat-ready-delta">-</div></div>
-    <div class="stat-card"><div class="stat-label">🚨 Aktive Einsätze</div><div class="stat-value" id="stat-active">0</div><div class="stat-delta neutral" id="stat-active-delta">Jetzt</div></div>
-    <div class="stat-card"><div class="stat-label">📅 Heute alarmiert</div><div class="stat-value" id="stat-today">0</div><div class="stat-delta neutral" id="stat-today-delta">Seit 00:00</div></div>
-  </div>
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="stat-card"><div class="stat-label">🚒 Gesamtfahrzeuge</div><div class="stat-value" id="stat-total">0</div></div>
+  <div class="stat-card"><div class="stat-label">🟢 Einsatzbereit</div><div class="stat-value" id="stat-ready">0</div><div class="stat-delta positive" id="stat-ready-delta">-</div></div>
+  <div class="stat-card"><div class="stat-label">🚨 Aktive Einsätze</div><div class="stat-value" id="stat-active">0</div><div class="stat-delta neutral" id="stat-active-delta">Jetzt</div></div>
+  <div class="stat-card"><div class="stat-label">📅 Heute alarmiert</div><div class="stat-value" id="stat-today">0</div><div class="stat-delta neutral" id="stat-today-delta">Seit 00:00</div></div>
+</div>
 
-  <!-- MAP -->
-  <div id="map-container">
-    <div id="map"></div>
-    <div class="map-controls">
-      <button class="map-btn active" id="layer-osm" onclick="setLayer('osm')">🗺️ OSM</button>
-      <button class="map-btn" id="layer-sat" onclick="setLayer('sat')">🛰️ Satellite</button>
-      <button class="map-btn" id="layer-dark" onclick="setLayer('dark')">🌙 Dark</button>
-      <button class="map-btn" id="drag-toggle" onclick="toggleDragMode()" title="Standorte verschiebbar machen">🔒 Fixiert</button>
-    </div>
-    <div class="drag-overlay" id="drag-overlay">📍 Neue Position wählen</div>
+<!-- MAP -->
+<div id="map-container">
+  <div id="map"></div>
+  <div class="map-controls">
+    <button class="map-btn active" id="layer-osm" onclick="setLayer('osm')">🗺️ OSM</button>
+    <button class="map-btn" id="layer-sat" onclick="setLayer('sat')">🛰️ Satellite</button>
+    <button class="map-btn" id="layer-dark" onclick="setLayer('dark')">🌙 Dark</button>
+    <button class="map-btn" id="drag-toggle" onclick="toggleDragMode()" title="Standorte verschiebbar machen">🔒 Fixiert</button>
   </div>
+  <div class="drag-overlay" id="drag-overlay">📍 Neue Position wählen</div>
+</div>
 
-  <!-- MISSION PANEL -->
-  <div id="mission-panel">
-    <div class="mission-controls">
-      <div class="mission-input">
-        <label>Einsatzadresse</label>
-        <input type="text" id="mission-address" placeholder="Straße Hausnr., PLZ Ort" autocomplete="off">
-        <div id="route-info" class="route-info"></div>
-      </div>
-      <div class="mission-select">
-        <label>Verfügbares Fahrzeug (nach Entfernung)</label>
-        <select id="vehicle-select"><option value="">-- Zuerst Einsatzadresse festlegen --</option></select>
-      </div>
-      <div class="mission-actions">
-        <button class="btn-alarm" onclick="createMission()">🚒 Alarmieren</button>
-        <button class="btn-cancel" onclick="clearMission()">Zurücksetzen</button>
-      </div>
+<!-- MISSION PANEL -->
+<div id="mission-panel">
+  <div class="mission-controls">
+    <div class="mission-input">
+      <label>Einsatzadresse</label>
+      <input type="text" id="mission-address" placeholder="Straße Hausnr., PLZ Ort" autocomplete="off">
+      <div id="route-info" class="route-info"></div>
     </div>
-  </div>
-
-  <!-- VEHICLE PANEL (NUR EINMAL!) -->
-  <div id="vehicle-panel">
-    <div class="panel-header">
-      <h2>🚒 Fahrzeugverwaltung</h2>
-      <button id="add-btn" onclick="openModal()">+ Neues Fahrzeug</button>
+    <div class="mission-select">
+      <label>Verfügbares Fahrzeug (nach Entfernung)</label>
+      <select id="vehicle-select"><option value="">-- Zuerst Einsatzadresse festlegen --</option></select>
     </div>
-    <div class="search-bar">
-      <input type="text" id="vehicle-search" class="search-input" placeholder="🔍 Suche..." oninput="filterVehicles()">
-    </div>
-    <div id="vehicle-list"></div>
-  </div>
-
-  <!-- HISTORY PANEL -->
-  <div id="history-toggle" onclick="toggleHistory()"><span>📋 Einsatzhistorie</span><span>▼</span></div>
-  <div id="history-panel">
-    <div id="history-scroll">
-      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-        <strong style="font-size:14px;">Alle Einsätze</strong>
-        <div style="display:flex; gap:8px;">
-          <button class="btn-export" onclick="exportHistory()">📥 Export CSV</button>
-          <button class="btn-reset" onclick="openResetPinModal()">🔄 Historie leeren</button>
-        </div>
-      </div>
-      <table class="history-table">
-        <thead><tr><th>Einsatz-Nr.</th><th>Datum/Uhrzeit</th><th>Fahrzeuge</th><th>Fahrzeugtypen</th><th>Einsatzadresse</th><th>Dauer</th><th>Status</th></tr></thead>
-        <tbody id="history-body"></tbody>
-      </table>
+    <div class="mission-actions">
+      <button class="btn-alarm" onclick="createMission()">🚒 Alarmieren</button>
+      <button class="btn-cancel" onclick="clearMission()">Zurücksetzen</button>
     </div>
   </div>
+</div>
 
-  <!-- MODAL FÜR FAHRZEUG -->
-  <div class="modal-overlay" id="modal">
-    <div class="modal">
-      <h3 id="modal-title">Fahrzeug anlegen</h3>
-      <div class="form-group"><label>Standortadresse (Gerätehaus)</label><input type="text" id="form-geraetehaus" placeholder="z. B. Feuerwehrstraße 1, 70173 Stuttgart" autocomplete="off"></div>
-      <div class="form-group"><label>Fahrzeugtyp</label><select id="form-fahrzeugtyp"></select></div>
-      <div class="form-group"><label>Funkrufname</label><input type="text" id="form-rufname" placeholder="z. B. Florian Stuttgart 1/44-1" autocomplete="off"></div>
-      <div class="form-group"><label>Telefonnummer (optional)</label><input type="tel" id="form-telefon" placeholder="z. B. 0711 123456"></div>
-      <div class="form-group"><label>Einsatzbereitschaft</label>
-        <select id="form-status">
-          <option value="einsatzbereit">🟢 Einsatzbereit</option>
-          <option value="nicht_einsatzbereit">🔴 Nicht einsatzbereit</option>
-          <option value="unklar">⚫ Verfügbarkeit unklar</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Ausrüstung (Freitext)</label><textarea id="form-ausruestung" placeholder="z. B. Atemschutz (3 Geräte), Motorpumpe MP 600/200..."></textarea></div>
-      <div class="form-actions">
-        <button class="btn-drill" onclick="openDrillMode()">📍 Standort setzen</button>
-        <button class="btn-delete" id="delete-btn" onclick="deleteVehicleFromModal()" style="display:none;">Löschen</button>
-        <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
-        <button class="btn-save" onclick="saveVehicle()">Speichern</button>
+<!-- VEHICLE PANEL -->
+<div id="vehicle-panel">
+  <div class="panel-header">
+    <h2>🚒 Fahrzeugverwaltung</h2>
+    <button id="add-btn" onclick="openModal()">+ Neues Fahrzeug</button>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="vehicle-search" class="search-input" placeholder="🔍 Suche..." oninput="filterVehicles()">
+  </div>
+  <div id="vehicle-list"></div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div id="history-toggle" onclick="toggleHistory()"><span>📋 Einsatzhistorie</span><span>▼</span></div>
+<div id="history-panel">
+  <div id="history-scroll">
+    <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <strong style="font-size:14px;">Alle Einsätze</strong>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-export" onclick="exportHistory()">📥 Export CSV</button>
+        <button class="btn-reset" onclick="openResetPinModal()">🔄 Historie leeren</button>
       </div>
     </div>
+    <table class="history-table">
+      <thead><tr><th>Einsatz-Nr.</th><th>Datum/Uhrzeit</th><th>Fahrzeuge</th><th>Fahrzeugtypen</th><th>Einsatzadresse</th><th>Dauer</th><th>Status</th></tr></thead>
+      <tbody id="history-body"></tbody>
+    </table>
   </div>
+</div>
 
-  <!-- MISSION DETAILS MODAL -->
-  <div class="modal-overlay" id="mission-modal">
-    <div class="modal" style="max-width:520px;">
-      <h3 id="mission-modal-title">Einsatzdetails</h3>
-      <div style="margin-bottom:12px;">
-        <strong>Einsatz-Nr:</strong> <span id="detail-mission-number"></span><br>
-        <strong>Adresse:</strong> <span id="detail-address"></span><br>
-        <strong>Gestartet:</strong> <span id="detail-created"></span>
-      </div>
-      <div style="margin:14px 0;">
-        <strong>Phase:</strong>
-        <div id="phase-badges" style="margin-top:8px;"></div>
-      </div>
-      <div id="vehicle-chips-container" style="margin:12px 0;"></div>
-      <div class="form-group" style="margin-top:16px;">
-        <label>Notiz hinzufügen</label>
-        <textarea id="mission-note-text" placeholder="Ereignis notieren..." style="min-height:50px;"></textarea>
-        <button onclick="addNoteToMission()" style="margin-top:8px; background:#6d4aff; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px;">➕ Notiz speichern</button>
-      </div>
-      <div id="notes-list" class="notes-section"></div>
-      <div class="form-actions">
-        <button class="btn-drill" id="btn-add-vehicle-to-mission" onclick="showVehicleSelectorForMission()">🚒 Fahrzeug hinzufügen</button>
-        <button class="btn-delete" id="btn-delete-mission" onclick="deleteMissionFromModal()">🗑️ Löschen</button>
-        <button class="btn-cancel" onclick="closeMissionModal()">Schließen</button>
-        <button class="btn-save" id="btn-complete-mission" onclick="completeMission()" style="background:#22c55e;">✅ Abschluss</button>
-      </div>
+<!-- MODAL FÜR FAHRZEUG -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Fahrzeug anlegen</h3>
+    <div class="form-group"><label>Standortadresse (Gerätehaus)</label><input type="text" id="form-geraetehaus" placeholder="z. B. Feuerwehrstraße 1, 70173 Stuttgart" autocomplete="off"></div>
+    <div class="form-group"><label>Fahrzeugtyp</label><select id="form-fahrzeugtyp"></select></div>
+    <div class="form-group"><label>Funkrufname</label><input type="text" id="form-rufname" placeholder="z. B. Florian Stuttgart 1/44-1" autocomplete="off"></div>
+    <div class="form-group"><label>Telefonnummer (optional)</label><input type="tel" id="form-telefon" placeholder="z. B. 0711 123456"></div>
+    <div class="form-group"><label>Einsatzbereitschaft</label>
+      <select id="form-status">
+        <option value="einsatzbereit">🟢 Einsatzbereit</option>
+        <option value="nicht_einsatzbereit">🔴 Nicht einsatzbereit</option>
+        <option value="unklar">⚫ Verfügbarkeit unklar</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Ausrüstung (Freitext)</label><textarea id="form-ausruestung" placeholder="z. B. Atemschutz (3 Geräte), Motorpumpe MP 600/200..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn-drill" onclick="openDrillMode()">📍 Standort setzen</button>
+      <button class="btn-delete" id="delete-btn" onclick="deleteVehicleFromModal()" style="display:none;">Löschen</button>
+      <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-save" onclick="saveVehicle()">Speichern</button>
     </div>
   </div>
+</div>
 
-  <!-- VEHICLE SELECTOR MODAL -->
-  <div class="modal-overlay" id="vehicle-selector-modal">
-    <div class="modal" style="max-width:500px;">
-      <h3>Fahrzeug zum Einsatz hinzufügen</h3>
-      <p style="font-size:13px; color:#666; margin-bottom:16px;">Nur einsatzbereite und freie Fahrzeuge werden angezeigt.</p>
-      <div id="vehicle-selector-list" style="max-height:300px; overflow-y:auto;"></div>
-      <div class="form-actions" style="margin-top:16px;">
-        <button class="btn-cancel" onclick="closeVehicleSelectorModal()">Abbrechen</button>
-      </div>
+<!-- MISSION DETAILS MODAL (NEU!) -->
+<div class="modal-overlay" id="mission-modal">
+  <div class="modal" style="max-width:520px;">
+    <h3 id="mission-modal-title">Einsatzdetails</h3>
+    <div style="margin-bottom:12px;">
+      <strong>Einsatz-Nr:</strong> <span id="detail-mission-number"></span><br>
+      <strong>Adresse:</strong> <span id="detail-address"></span><br>
+      <strong>Gestartet:</strong> <span id="detail-created"></span>
+    </div>
+    <div style="margin:14px 0;">
+      <strong>Phase:</strong>
+      <div id="phase-badges" style="margin-top:8px;"></div>
+    </div>
+    <div id="vehicle-chips-container" style="margin:12px 0;"></div>
+    <div class="form-group" style="margin-top:16px;">
+      <label>Notiz hinzufügen</label>
+      <textarea id="mission-note-text" placeholder="Ereignis notieren..." style="min-height:50px;"></textarea>
+      <button onclick="addNoteToMission()" style="margin-top:8px; background:#6d4aff; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px;">➕ Notiz speichern</button>
+    </div>
+    <div id="notes-list" class="notes-section"></div>
+    <div class="form-actions">
+      <button class="btn-drill" id="btn-add-vehicle-to-mission" onclick="showVehicleSelectorForMission()">🚒 Fahrzeug hinzufügen</button>
+      <button class="btn-delete" id="btn-delete-mission" onclick="deleteMissionFromModal()">🗑️ Löschen</button>
+      <button class="btn-cancel" onclick="closeMissionModal()">Schließen</button>
+      <button class="btn-save" id="btn-complete-mission" onclick="completeMission()" style="background:#22c55e;">✅ Abschluss</button>
     </div>
   </div>
+</div>
 
-  <!-- PIN MODAL -->
-  <div class="pin-modal-overlay" id="pin-modal">
-    <div class="pin-modal">
-      <h3>🔐 PIN eingeben</h3>
-      <p>Historie und Dashboard zurücksetzen (Fahrzeuge bleiben erhalten)</p>
-      <div class="pin-input-container">
-        <input type="password" class="pin-digit" maxlength="1" data-index="0" autocomplete="off">
-        <input type="password" class="pin-digit" maxlength="1" data-index="1" autocomplete="off">
-        <input type="password" class="pin-digit" maxlength="1" data-index="2" autocomplete="off">
-        <input type="password" class="pin-digit" maxlength="1" data-index="3" autocomplete="off">
-      </div>
-      <div class="pin-feedback" id="pin-feedback"></div>
-      <div class="pin-buttons">
-        <button class="pin-btn-cancel" onclick="closeResetPinModal()">Abbrechen</button>
-        <button class="pin-btn-confirm" onclick="submitResetPin()">Bestätigen</button>
-      </div>
+<!-- PIN MODAL -->
+<div class="pin-modal-overlay" id="pin-modal">
+  <div class="pin-modal">
+    <h3>🔐 PIN eingeben</h3>
+    <p>Historie und Dashboard zurücksetzen (Fahrzeuge bleiben erhalten)</p>
+    <div class="pin-input-container">
+      <input type="password" class="pin-digit" maxlength="1" data-index="0" autocomplete="off">
+      <input type="password" class="pin-digit" maxlength="1" data-index="1" autocomplete="off">
+      <input type="password" class="pin-digit" maxlength="1" data-index="2" autocomplete="off">
+      <input type="password" class="pin-digit" maxlength="1" data-index="3" autocomplete="off">
+    </div>
+    <div class="pin-feedback" id="pin-feedback"></div>
+    <div class="pin-buttons">
+      <button class="pin-btn-cancel" onclick="closeResetPinModal()">Abbrechen</button>
+      <button class="pin-btn-confirm" onclick="submitResetPin()">Bestätigen</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const FAHRZEUGTYPEN = ['ELW 1', 'HLF10', 'HLF20', 'LF10', 'LF20', 'TSF', 'TSF-W', 'TLF16/25', 'TLF8/8', 'FwA-ÖSA', 'FwA-GTR', 'DLK', 'MTW', 'Argo8*8', 'MZF'];
-    const STORAGE_VEHICLES = 'fw_vehicles_v20';
-    const STORAGE_MISSIONS  = 'fw_missions_v20';
-    const DEFAULT_RESET_PIN = '1234';
-    const MARKER_SIZE = 36;
-    const MARKER_ANCHOR = [MARKER_SIZE / 2, MARKER_SIZE / 2];
+<!-- VEHICLE SELECTOR MODAL (für Mehrfahrzeug-Einsätze) -->
+<div class="modal-overlay" id="vehicle-selector-modal">
+  <div class="modal" style="max-width:500px;">
+    <h3>Fahrzeug zum Einsatz hinzufügen</h3>
+    <p style="font-size:13px; color:#666; margin-bottom:16px;">Nur einsatzbereite und freie Fahrzeuge werden angezeigt.</p>
+    <div id="vehicle-selector-list" style="max-height:300px; overflow-y:auto;"></div>
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn-cancel" onclick="closeVehicleSelectorModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
 
-    let map, vehicles = [], missions = [];
-    let homeMarkers = {}, missionMarkers = {}, routeLines = {};
-    let currentEditingMissionId = null, currentEditingVehicleId = null;
-    let selectedLat = null, selectedLon = null, geocodeTimer = null;
-    let currentLayer = 'osm', drillModeActive = false, dragEnabled = false;
-    let missionMarker = null;
+<script>
 
-    const tileLayers = {
-      osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
-      sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }),
-      dark: L.tileLayer('https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' })
-    };
+const FAHRZEUGTYPEN = ['ELW 1', 'HLF10', 'HLF20', 'LF10', 'LF20', 'TSF', 'TSF-W', 'MLF', 'TLF16/25', 'TLF8/8', 'FwA-ÖSA', 'FwA-GTR', 'DLK', 'MTW', 'Argo8*8', 'MZF'];
+const STORAGE_VEHICLES = 'fw_vehicles_v20';
+const STORAGE_MISSIONS  = 'fw_missions_v20';
+const DEFAULT_RESET_PIN = '1234';
+const MARKER_SIZE = 36;
+const MARKER_ANCHOR = [MARKER_SIZE / 2, MARKER_SIZE / 2];
 
-    function makeIcon(kind, emoji) {
-      return L.divIcon({ 
-        className: 'custom-marker',
-        html: `<span class="marker-inner-wrapper"><span class="marker-bg"></span><span class="marker-emoji ${kind}">${emoji}</span></span>`, 
-        iconSize: [MARKER_SIZE, MARKER_SIZE], 
-        iconAnchor: MARKER_ANCHOR 
-      });
-    }
+let map, vehicles = [], missions = [];
+let homeMarkers = {}, missionMarkers = {}, routeLines = {};
+let currentEditingMissionId = null, currentEditingVehicleId = null;
+let selectedLat = null, selectedLon = null, geocodeTimer = null;
+let currentLayer = 'osm', drillModeActive = false, dragEnabled = false;
+let missionMarker = null;
 
-    function toggleDragMode() {
-      dragEnabled = !dragEnabled;
-      const btn = document.getElementById('drag-toggle');
-      btn.textContent = dragEnabled ? '🔓 Verschieben aktiv' : '🔒 Fixiert';
-      btn.classList.toggle('active', dragEnabled);
-      document.getElementById('map').classList.toggle('drag-mode', dragEnabled);
-      Object.values(homeMarkers).forEach(m => applyDragState(m));
-    }
+const tileLayers = {
+  osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }),
+  dark: L.tileLayer('https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' })
+};
 
-    function applyDragState(marker) { 
-      if (!marker || !marker.dragging) return; 
-      if (dragEnabled) marker.dragging.enable(); else marker.dragging.disable(); 
-    }
+function makeIcon(kind, emoji) {
+  return L.divIcon({ 
+    className: '', 
+    html: `<span class="marker-wrapper"><span class="marker-bg"></span><span class="marker-emoji ${kind}">${emoji}</span></span>`, 
+    iconSize: [MARKER_SIZE, MARKER_SIZE], 
+    iconAnchor: MARKER_ANCHOR 
+  });
+}
 
-    function openResetPinModal() { 
-      document.getElementById('pin-modal').classList.add('active'); 
-      document.querySelectorAll('.pin-digit').forEach(input => { input.value = ''; input.style.borderColor = '#ccc'; }); 
-      document.getElementById('pin-feedback').textContent = ''; 
-      document.getElementById('pin-feedback').className = 'pin-feedback'; 
-      document.querySelector('[data-index="0"]').focus(); 
-    }
+function toggleDragMode() {
+  dragEnabled = !dragEnabled;
+  const btn = document.getElementById('drag-toggle');
+  btn.textContent = dragEnabled ? '🔓 Verschieben aktiv' : '🔒 Fixiert';
+  btn.classList.toggle('active', dragEnabled);
+  document.getElementById('map').classList.toggle('drag-mode', dragEnabled);
+  Object.values(homeMarkers).forEach(m => applyDragState(m));
+}
 
-    function closeResetPinModal() { document.getElementById('pin-modal').classList.remove('active'); }
+function applyDragState(marker) { 
+  if (!marker || !marker.dragging) return; 
+  if (dragEnabled) marker.dragging.enable(); else marker.dragging.disable(); 
+}
 
-    document.querySelectorAll('.pin-digit').forEach((input, idx) => {
-      input.addEventListener('input', (e) => { 
-        if (e.target.value.length === 1 && idx < 3) document.querySelector(`[data-index="${idx + 1}"]`).focus(); 
-        checkPinLength(); 
-      });
-      input.addEventListener('keydown', (e) => { 
-        if (e.key === 'Backspace' && !e.target.value && idx > 0) document.querySelector(`[data-index="${idx - 1}"]`).focus(); 
-      });
+/* ========== PIN MODAL ========== */
+function openResetPinModal() { 
+  document.getElementById('pin-modal').classList.add('active'); 
+  document.querySelectorAll('.pin-digit').forEach(input => { input.value = ''; input.style.borderColor = '#ccc'; }); 
+  document.getElementById('pin-feedback').textContent = ''; 
+  document.getElementById('pin-feedback').className = 'pin-feedback'; 
+  document.querySelector('[data-index="0"]').focus(); 
+}
+
+function closeResetPinModal() { document.getElementById('pin-modal').classList.remove('active'); }
+
+document.querySelectorAll('.pin-digit').forEach((input, idx) => {
+  input.addEventListener('input', (e) => { 
+    if (e.target.value.length === 1 && idx < 3) document.querySelector(`[data-index="${idx + 1}"]`).focus(); 
+    checkPinLength(); 
+  });
+  input.addEventListener('keydown', (e) => { 
+    if (e.key === 'Backspace' && !e.target.value && idx > 0) document.querySelector(`[data-index="${idx - 1}"]`).focus(); 
+  });
+});
+
+function checkPinLength() { 
+  const pins = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join(''); 
+  document.querySelectorAll('.pin-digit').forEach((digit, idx) => { digit.style.borderColor = idx < pins.length ? '#6d4aff' : '#ccc'; }); 
+}
+
+function submitResetPin() { 
+  const enteredPin = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join(''); 
+  const feedback = document.getElementById('pin-feedback'); 
+  if (enteredPin.length !== 4) { 
+    feedback.textContent = '⚠️ Bitte 4-stellige PIN eingeben'; 
+    feedback.className = 'pin-feedback error'; 
+    return; 
+  } 
+  if (enteredPin !== DEFAULT_RESET_PIN) { 
+    feedback.textContent = '❌ Falsche PIN'; 
+    feedback.className = 'pin-feedback error'; 
+    document.querySelectorAll('.pin-digit').forEach(d => d.style.borderColor = '#dc2626'); 
+    setTimeout(() => { feedback.textContent = ''; document.querySelectorAll('.pin-digit').forEach(d => d.style.borderColor = '#ccc'); }, 2000); 
+    return; 
+  } 
+  feedback.textContent = '✅ Historie erfolgreich geleert'; 
+  feedback.className = 'pin-feedback success'; 
+  setTimeout(() => { 
+    closeResetPinModal(); 
+    missions = []; 
+    localStorage.removeItem(STORAGE_MISSIONS); 
+    renderHistory(); 
+    renderStats(); 
+    Object.values(missionMarkers).forEach(m => map.removeLayer(m)); 
+    missionMarkers = {}; 
+    Object.values(homeMarkers).forEach(m => { 
+      const v = vehicles.find(x => x.id === m.options.id); 
+      if (v && v.assignedMissions) v.assignedMissions = []; 
+    }); 
+    vehicles.forEach(saveVehicleMarker); 
+  }, 1000); 
+}
+
+document.addEventListener('DOMContentLoaded', async () => { fillTypeDropdowns(); loadData(); initMap(); drawAllMarkers(); renderVehicleList(); renderStats(); renderHistory(); bindMissionInput(); });
+
+function fillTypeDropdowns() { document.getElementById('form-fahrzeugtyp').innerHTML = FAHRZEUGTYPEN.map(t => `<option value="${t}">${t}</option>`).join(''); }
+
+function initMap() {
+  map = L.map('map-container', { zoomControl: false, zoomAnimation: true, markerZoomAnimation: false, fadeAnimation: true }).setView([51.1657, 10.4515], 6);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  tileLayers.osm.addTo(map);
+  
+  // WICHTIG: Zoom-stabiliser Viewreset!
+  map.on('viewreset', () => {
+    document.querySelectorAll('.marker-wrapper').forEach(el => {
+      el.style.transform = 'none';
     });
+  });
+  
+  map.on('click', async (e) => {
+    if (drillModeActive) { handleDrillClick(e.latlng.lat, e.latlng.lng); return; }
+    selectedLat = e.latlng.lat; selectedLon = e.latlng.lng; removePreviewMarker();
+    missionMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: makeIcon('target', '🎯'), interactive: false }).addTo(map);
+    const addr = await reverseGeocode(e.latlng.lat, e.latlng.lng);
+    if (addr) document.getElementById('mission-address').value = addr;
+    fillVehicleOptions(selectedLat, selectedLon);
+    calculateAndShowRoute();
+  });
+}
 
-    function checkPinLength() { 
-      const pins = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join(''); 
-      document.querySelectorAll('.pin-digit').forEach((digit, idx) => { digit.style.borderColor = idx < pins.length ? '#6d4aff' : '#ccc'; }); 
+function setLayer(layerName) {
+  Object.values(tileLayers).forEach(l => map.removeLayer(l));
+  tileLayers[layerName].addTo(map);
+  currentLayer = layerName;
+  document.querySelectorAll('.map-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`layer-${layerName}`).classList.add('active');
+  redrawAllMarkers();
+}
+
+function redrawAllMarkers() {
+  Object.values(homeMarkers).forEach(m => map.removeLayer(m));
+  Object.values(missionMarkers).forEach(m => map.removeLayer(m));
+  Object.values(routeLines).forEach(l => map.removeLayer(l));
+  homeMarkers = {}; missionMarkers = {}; routeLines = {};
+  vehicles.filter(v => v.lat && v.lon).forEach(v => saveVehicleMarker(v));
+  missions.filter(m => m.phases.alarm).forEach(m => placeMissionMarker(m, true));
+}
+
+function bindMissionInput() {
+  const input = document.getElementById('mission-address');
+  input.addEventListener('input', () => { clearTimeout(geocodeTimer); selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse eingeben --</option>'; geocodeTimer = setTimeout(() => resolveAddress(input.value.trim()), 950); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(geocodeTimer); resolveAddress(input.value.trim()); }});
+}
+
+function loadData() {
+  const storedV = localStorage.getItem(STORAGE_VEHICLES);
+  const storedM = localStorage.getItem(STORAGE_MISSIONS);
+  if (storedV) { vehicles = JSON.parse(storedV); } else {
+    vehicles = [
+      { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', ausruestung: 'Atemschutz (3 Geräte), Motorpumpe MP 600/200', lat: 48.7758, lon: 9.1829, assignedMissions: [] },
+      { id: 'v2', geraetehaus: 'Bahnhofstraße 5, 73728 Esslingen', fahrzeugTyp: 'DLK', rufname: 'Florian Esslingen 1/33-1', telefon: '0711 8765432', status: 'einsatzbereit', ausruestung: 'Drehleiter mit Korb (24 m)', lat: 48.7395, lon: 9.3089, assignedMissions: [] },
+      { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '0711 112233', status: 'nicht_einsatzbereit', ausruestung: '', lat: 48.8974, lon: 9.1916, assignedMissions: [] }
+    ]; saveData();
+  }
+  missions = storedM ? JSON.parse(storedM) : [];
+  vehicles.forEach(x => { 
+    if (!x.assignedMissions) x.assignedMissions = []; 
+    if (!x.telefon) x.telefon = ''; 
+    if (!x.ausruestung) x.ausruestung = ''; 
+    if (x.lat === undefined) x.lat = null; 
+    if (x.lon === undefined) x.lon = null; 
+  });
+}
+
+function saveData() { localStorage.setItem(STORAGE_VEHICLES, JSON.stringify(vehicles)); localStorage.setItem(STORAGE_MISSIONS, JSON.stringify(missions)); }
+
+function drawAllMarkers() { 
+  vehicles.filter(v => v.lat != null && v.lon != null).forEach(v => { if (!homeMarkers[v.id]) saveVehicleMarker(v); }); 
+  missions.filter(m => m.phases.alarm).forEach(m => { if (!missionMarkers[m.id]) placeMissionMarker(m); }); 
+}
+
+function saveVehicleMarker(vehicle, forceRedraw = false) {
+  if (!vehicle.lat || !vehicle.lon) return; 
+  const pos = [vehicle.lat, vehicle.lon];
+  if (homeMarkers[vehicle.id] && !forceRedraw) { homeMarkers[vehicle.id].setLatLng(pos); return; }
+  if (homeMarkers[vehicle.id]) map.removeLayer(homeMarkers[vehicle.id]);
+  homeMarkers[vehicle.id] = L.marker(pos, { icon: makeIcon('home', '🏠'), draggable: false, keyboard: false, riseOnHover: true, id: vehicle.id })
+    .addTo(map).bindTooltip(getHomeTooltip(vehicle), { direction: 'top', offset: [0, -18], sticky: true });
+  applyDragState(homeMarkers[vehicle.id]);
+  homeMarkers[vehicle.id].on('dragend', async (e) => {
+    const latlng = e.target.getLatLng();
+    const addr = await reverseGeocode(latlng.lat, latlng.lng);
+    const v = vehicles.find(x => x.id === vehicle.id);
+    if (v) { v.lat = latlng.lat; v.lon = latlng.lng; if (addr) v.geraetehaus = addr; saveData(); renderVehicleList(); e.target.setTooltipContent(getHomeTooltip(v)); if (selectedLat && selectedLon) calculateAndShowRoute(); }
+  });
+  homeMarkers[vehicle.id].on('click', () => openModal(vehicle.id));
+}
+
+function getHomeTooltip(vehicle) {
+  let tooltip = `<strong>${escapeHtml(vehicle.rufname)}</strong><br>${escapeHtml(vehicle.fahrzeugTyp)}<br>${escapeHtml(vehicle.geraetehaus)}`;
+  if (vehicle.telefon) tooltip += `<br>📞 ${escapeHtml(vehicle.telefon)}`;
+  if (vehicle.ausruestung && vehicle.ausruestung.trim()) { tooltip += `<br><br><strong style="color:#6d4aff;">Ausrüstung:</strong><br><span style="font-size:12px;">${escapeHtml(vehicle.ausruestung)}</span>`; }
+  if (vehicle.assignedMissions && vehicle.assignedMissions.length > 0) {
+    tooltip += `<br><br><strong style="color:#e74c3c;">${vehicle.assignedMissions.length} aktive Einsätze</strong>`;
+  }
+  return tooltip;
+}
+
+function placeMissionMarker(mission, forceRedraw = false) {
+  if (missionMarkers[mission.id] && !forceRedraw) return;
+  if (missionMarkers[mission.id]) map.removeLayer(missionMarkers[mission.id]);
+  const vehicleCount = mission.vehicleIds ? mission.vehicleIds.length : 0;
+  const emoji = vehicleCount > 1 ? '🚒🚒' : '🚒';
+  missionMarkers[mission.id] = L.marker([mission.lat, mission.lon], { icon: makeIcon('truck', emoji), draggable: false, keyboard: false, riseOnHover: true, id: mission.id })
+    .addTo(map).bindTooltip(getMissionTooltip(mission), { direction: 'top', offset: [0, -18], sticky: true });
+}
+
+function getMissionTooltip(mission) {
+  const vehicleNames = (mission.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : null; }).filter(Boolean);
+  const phases = getPhaseLabels(mission);
+  return `<strong>Einsatz ${mission.missionNumber || '?'}</strong><br>${escapeHtml(mission.address)}<br>${vehicleNames.length} Fahrzeug(e)<br>${phases}`;
+}
+
+function getPhaseLabels(mission) {
+  const phases = [];
+  if (mission.phases.alarm) phases.push('🚨 Alarm');
+  if (mission.phases.abfahrt) phases.push('🚙 Abfahrt');
+  if (mission.phases.ankunft) phases.push('🏁 Ankunft');
+  if (mission.phases.erledigt) phases.push('✅ Erledigt');
+  return phases.join(' · ') || '📋 Geplant';
+}
+
+function removePreviewMarker() { if (missionMarker) { map.removeLayer(missionMarker); missionMarker = null; } }
+function clearRoute() { Object.values(routeLines).forEach(l => map.removeLayer(l)); routeLines = {}; document.getElementById('route-info').innerHTML = ''; document.getElementById('route-info').classList.remove('visible'); }
+
+async function geocode(query) { const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`; const res = await fetch(url, { headers: { 'Accept': 'application/json' } }); if (res.status === 403) throw new Error('Geocoding blockiert'); if (!res.ok) throw new Error('Geocoding fehlgeschlagen'); const data = await res.json(); return data.length ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) } : null; }
+
+async function reverseGeocode(lat, lon) { try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`); const data = await res.json(); return data.display_name || null; } catch { return null; } }
+
+async function resolveAddress(address) {
+  if (!address) { removePreviewMarker(); selectedLat = null; selectedLon = null; clearRoute(); document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; return; }
+  try { const hit = await geocode(address); if (!hit) { document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>'; return; } selectedLat = hit.lat; selectedLon = hit.lon; removePreviewMarker(); missionMarker = L.marker([selectedLat, selectedLon], { icon: makeIcon('target', '🎯'), interactive: false }).addTo(map); map.flyTo([selectedLat, selectedLon], 14); fillVehicleOptions(selectedLat, selectedLon); calculateAndShowRoute(); } catch { document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>'; }
+}
+
+async function calculateAndShowRoute() {
+  if (!selectedLat || !selectedLon) { clearRoute(); return; }
+  const vehicleId = document.getElementById('vehicle-select').value; if (!vehicleId) { clearRoute(); return; }
+  const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle || vehicle.status !== 'einsatzbereit') { clearRoute(); return; }
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${vehicle.lon},${vehicle.lat};${selectedLon},${selectedLat}?overview=full&geometries=geojson`;
+    const res = await fetch(url); if (!res.ok) throw new Error();
+    const data = await res.json(); if (!data.routes?.length) throw new Error();
+    const route = data.routes[0]; const distanceKm = (route.distance / 1000).toFixed(1); const durationMin = Math.round(route.duration / 60);
+    const latLngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+    if (routeLines['preview']) map.removeLayer(routeLines['preview']);
+    routeLines['preview'] = L.polyline(latLngs, { color: '#6d4aff', weight: 5, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
+    const infoDiv = document.getElementById('route-info'); infoDiv.innerHTML = `🛣️ <strong>Route:</strong> ${distanceKm} km · ca. ${durationMin} min`; infoDiv.classList.add('visible');
+    map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
+  } catch { const infoDiv = document.getElementById('route-info'); const v = vehicles.find(v => v.id === document.getElementById('vehicle-select').value); infoDiv.innerHTML = `ℹ️ Luftlinie: ${haversine(v?.lat, v?.lon, selectedLat, selectedLon).toFixed(1)} km`; infoDiv.classList.add('visible'); }
+}
+
+function fillVehicleOptions(lat, lon) {
+  const select = document.getElementById('vehicle-select');
+  if (lat == null || lon == null) { select.innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; clearRoute(); return; }
+  const verfuegbar = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id) && v.lat != null && v.lon != null).map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) })).sort((a, b) => a.dist - b.dist);
+  if (!verfuegbar.length) { select.innerHTML = '<option value="">-- Kein freies Fahrzeug verfügbar --</option>'; clearRoute(); return; }
+  select.innerHTML = '<option value="">-- Fahrzeug wählen --</option>' + verfuegbar.map(({ v, dist }) => `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`).join('');
+  select.onchange = () => calculateAndShowRoute();
+}
+
+function haversine(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
+
+/* ========== NEUE LOGIK: Mehrfahrzeug-Einsätze ========== */
+function isVehicleBusy(vehicleId) {
+  const v = vehicles.find(x => x.id === vehicleId);
+  if (!v || !v.assignedMissions) return false;
+  // Fahrzeug ist busy, wenn es in einem aktiven Einsatz ist (nicht erledigt)
+  return v.assignedMissions.some(mid => {
+    const m = missions.find(x => x.id === mid);
+    return m && !m.phases.erledigt;
+  });
+}
+
+function generateUniqueMissionNumber() {
+  const now = new Date(); const yyyy = now.getFullYear(), mm = String(now.getMonth() + 1).padStart(2, '0'), dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0'), min = String(now.getMinutes()).padStart(2, '0'), ss = String(now.getSeconds()).padStart(2, '0'), ms = String(now.getMilliseconds()).padStart(3, '0');
+  const baseNum = `${dd}${mm}${yyyy}-${hh}${min}${ss}`, fullNum = `${baseNum}.${ms}`;
+  let attempts = 0, uniqueNum = fullNum; while (missions.some(m => m.missionNumber === uniqueNum) && attempts < 100) { const extraMs = String(now.getMilliseconds() + attempts + 1).padStart(3, '0'); uniqueNum = `${baseNum}.${extraMs}`; attempts++; }
+  return uniqueNum;
+}
+
+function createMission() {
+  const vehicleId = document.getElementById('vehicle-select').value, address = document.getElementById('mission-address').value.trim();
+  if (!selectedLat || !selectedLon) return alert('Erstens Einsatzadresse festlegen.'); 
+  if (!vehicleId) return alert('Bitte Fahrzeug auswählen.');
+  const vehicle = vehicles.find(v => v.id === vehicleId); 
+  if (!vehicle) return alert('Fahrzeug nicht gefunden.'); 
+  if (isVehicleBusy(vehicleId)) return alert('Fahrzeug belegt.');
+  
+  const missionNumber = generateUniqueMissionNumber();
+  const mission = { 
+    id: 'm' + Date.now(), 
+    missionNumber, 
+    address, 
+    lat: selectedLat, 
+    lon: selectedLon, 
+    vehicleIds: [vehicleId], 
+    phases: { alarm: new Date().toISOString(), abfahrt: null, ankunft: null, erledigt: null },
+    notes: [],
+    createdAt: new Date().toISOString(), 
+    completedAt: null 
+  };
+  missions.push(mission); 
+  vehicle.assignedMissions.push(mission.id);
+  saveData();
+  placeMissionMarker(mission); 
+  missionMarkers[mission.id]?.getElement()?.classList.add('jump-animation'); 
+  setTimeout(() => missionMarkers[mission.id]?.getElement()?.classList.remove('jump-animation'), 700);
+  map.flyTo([mission.lat, mission.lon], 15); 
+  clearRoute(); 
+  clearMission(); 
+  renderStats(); 
+  renderVehicleList(); 
+  renderHistory(); 
+}
+
+function openMissionModal(missionId) {
+  currentEditingMissionId = missionId;
+  const mission = missions.find(m => m.id === missionId);
+  if (!mission) return;
+  
+  document.getElementById('mission-modal-title').textContent = `Einsatz ${mission.missionNumber || '?'}`;
+  document.getElementById('detail-mission-number').textContent = mission.missionNumber || '-';
+  document.getElementById('detail-address').textContent = mission.address;
+  document.getElementById('detail-created').textContent = new Date(mission.createdAt).toLocaleString('de-DE');
+  
+  renderPhaseBadges(mission);
+  renderVehicleChips(mission);
+  renderNotesList(mission);
+  
+  document.getElementById('btn-complete-mission').style.display = mission.phases.erledigt ? 'none' : 'inline-block';
+  document.getElementById('mission-modal').classList.add('active');
+}
+
+function renderPhaseBadges(mission) {
+  const container = document.getElementById('phase-badges');
+  const phases = [
+    { key: 'alarm', label: '🚨 Alarm', class: 'alarm' },
+    { key: 'abfahrt', label: '🚙 Abfahrt', class: 'abfahrt' },
+    { key: 'ankunft', label: '🏁 Ankunft', class: 'ankunft' },
+    { key: 'erledigt', label: '✅ Erledigt', class: 'erledigt' }
+  ];
+  container.innerHTML = phases.map(p => {
+    const active = mission.phases[p.key];
+    return `<span class="phase-badge ${active ? p.class : 'phase-pending'}" onclick="setPhase('${p.key}')">${p.label}${active ? ' ' + formatTime(active) : ''}</span>`;
+  }).join('');
+}
+
+function formatTime(isoString) {
+  const d = new Date(isoString);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function setPhase(phaseKey) {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  if (!mission) return;
+  
+  if (mission.phases[phaseKey]) {
+    if (!confirm(`Phase "${phaseKey}" zurücksetzen?`)) return;
+    mission.phases[phaseKey] = null;
+  } else {
+    // Phasen müssen sequenziell gesetzt werden
+    const order = ['alarm', 'abfahrt', 'ankunft', 'erledigt'];
+    const currentIndex = order.indexOf(phaseKey);
+    for (let i = 0; i < currentIndex; i++) {
+      if (!mission.phases[order[i]]) return alert(`Bitte erst Phase "${order[i]}" setzen.`);
     }
-
-    function submitResetPin() { 
-      const enteredPin = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join(''); 
-      const feedback = document.getElementById('pin-feedback'); 
-      if (enteredPin.length !== 4) { 
-        feedback.textContent = '⚠️ Bitte 4-stellige PIN eingeben'; 
-        feedback.className = 'pin-feedback error'; 
-        return; 
-      } 
-      if (enteredPin !== DEFAULT_RESET_PIN) { 
-        feedback.textContent = '❌ Falsche PIN'; 
-        feedback.className = 'pin-feedback error'; 
-        document.querySelectorAll('.pin-digit').forEach(d => d.style.borderColor = '#dc2626'); 
-        setTimeout(() => { feedback.textContent = ''; document.querySelectorAll('.pin-digit').forEach(d => d.style.borderColor = '#ccc'); }, 2000); 
-        return; 
-      } 
-      feedback.textContent = '✅ Historie erfolgreich geleert'; 
-      feedback.className = 'pin-feedback success'; 
-      setTimeout(() => { 
-        closeResetPinModal(); 
-        missions = []; 
-        localStorage.removeItem(STORAGE_MISSIONS); 
-        renderHistory(); 
-        renderStats(); 
-        Object.values(missionMarkers).forEach(m => map.removeLayer(m)); 
-        missionMarkers = {}; 
-        vehicles.forEach(v => { if (v.assignedMissions) v.assignedMissions = []; }); 
-        renderVehicleList();
-      }, 1000); 
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => { fillTypeDropdowns(); loadData(); initMap(); drawAllMarkers(); renderVehicleList(); renderStats(); renderHistory(); bindMissionInput(); });
-
-    function fillTypeDropdowns() { document.getElementById('form-fahrzeugtyp').innerHTML = FAHRZEUGTYPEN.map(t => `<option value="${t}">${t}</option>`).join(''); }
-
-    function initMap() {
-      map = L.map('map-container', { zoomControl: false, zoomAnimation: true, markerZoomAnimation: false, fadeAnimation: true }).setView([51.1657, 10.4515], 6);
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-      tileLayers.osm.addTo(map);
-      
-      map.on('zoomend viewreset', () => {
-        document.querySelectorAll('.marker-inner-wrapper').forEach(el => {
-          el.style.transform = 'none';
-        });
-      });
-      
-      map.on('click', async (e) => {
-        if (drillModeActive) { handleDrillClick(e.latlng.lat, e.latlng.lng); return; }
-        selectedLat = e.latlng.lat; selectedLon = e.latlng.lng; removePreviewMarker();
-        missionMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: makeIcon('target', '🎯'), interactive: false }).addTo(map);
-        const addr = await reverseGeocode(e.latlng.lat, e.latlng.lng);
-        if (addr) document.getElementById('mission-address').value = addr;
-        fillVehicleOptions(selectedLat, selectedLon);
-        calculateAndShowRoute();
-      });
-    }
-
-    function setLayer(layerName) {
-      Object.values(tileLayers).forEach(l => map.removeLayer(l));
-      tileLayers[layerName].addTo(map);
-      currentLayer = layerName;
-      document.querySelectorAll('.map-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`layer-${layerName}`).classList.add('active');
-      redrawAllMarkers();
-    }
-
-    function redrawAllMarkers() {
-      Object.values(homeMarkers).forEach(m => map.removeLayer(m));
-      Object.values(missionMarkers).forEach(m => map.removeLayer(m));
-      Object.values(routeLines).forEach(l => map.removeLayer(l));
-      homeMarkers = {}; missionMarkers = {}; routeLines = {};
-      vehicles.filter(v => v.lat && v.lon).forEach(v => saveVehicleMarker(v));
-      missions.filter(m => m.phases.alarm).forEach(m => placeMissionMarker(m, true));
-    }
-
-    function bindMissionInput() {
-      const input = document.getElementById('mission-address');
-      input.addEventListener('input', () => { clearTimeout(geocodeTimer); selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse eingeben --</option>'; geocodeTimer = setTimeout(() => resolveAddress(input.value.trim()), 950); });
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(geocodeTimer); resolveAddress(input.value.trim()); }});
-    }
-
-    function loadData() {
-      const storedV = localStorage.getItem(STORAGE_VEHICLES);
-      const storedM = localStorage.getItem(STORAGE_MISSIONS);
-      if (storedV) { vehicles = JSON.parse(storedV); } else {
-        vehicles = [
-          { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', ausruestung: 'Atemschutz (3 Geräte), Motorpumpe MP 600/200', lat: 48.7758, lon: 9.1829, assignedMissions: [] },
-          { id: 'v2', geraetehaus: 'Bahnhofstraße 5, 73728 Esslingen', fahrzeugTyp: 'DLK', rufname: 'Florian Esslingen 1/33-1', telefon: '0711 8765432', status: 'einsatzbereit', ausruestung: 'Drehleiter mit Korb (24 m)', lat: 48.7395, lon: 9.3089, assignedMissions: [] },
-          { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '0711 112233', status: 'nicht_einsatzbereit', ausruestung: '', lat: 48.8974, lon: 9.1916, assignedMissions: [] }
-        ]; saveData();
-      }
-      missions = storedM ? JSON.parse(storedM) : [];
-      vehicles.forEach(x => { 
-        if (!x.assignedMissions) x.assignedMissions = []; 
-        if (!x.telefon) x.telefon = ''; 
-        if (!x.ausruestung) x.ausruestung = ''; 
-        if (x.lat === undefined) x.lat = null; 
-        if (x.lon === undefined) x.lon = null; 
-      });
-    }
-
-    function saveData() { localStorage.setItem(STORAGE_VEHICLES, JSON.stringify(vehicles)); localStorage.setItem(STORAGE_MISSIONS, JSON.stringify(missions)); }
-
-    function drawAllMarkers() { 
-      vehicles.filter(v => v.lat != null && v.lon != null).forEach(v => { if (!homeMarkers[v.id]) saveVehicleMarker(v); }); 
-      missions.filter(m => m.phases.alarm).forEach(m => { if (!missionMarkers[m.id]) placeMissionMarker(m); }); 
-    }
-
-    function saveVehicleMarker(vehicle, forceRedraw = false) {
-      if (!vehicle.lat || !vehicle.lon) return; 
-      const pos = [vehicle.lat, vehicle.lon];
-      if (homeMarkers[vehicle.id] && !forceRedraw) { homeMarkers[vehicle.id].setLatLng(pos); return; }
-      if (homeMarkers[vehicle.id]) map.removeLayer(homeMarkers[vehicle.id]);
-      homeMarkers[vehicle.id] = L.marker(pos, { icon: makeIcon('home', '🏠'), draggable: false, keyboard: false, riseOnHover: true, id: vehicle.id })
-        .addTo(map).bindTooltip(getHomeTooltip(vehicle), { direction: 'top', offset: [0, -18], sticky: true });
-      applyDragState(homeMarkers[vehicle.id]);
-      homeMarkers[vehicle.id].on('dragend', async (e) => {
-        const latlng = e.target.getLatLng();
-        const addr = await reverseGeocode(latlng.lat, latlng.lng);
-        const v = vehicles.find(x => x.id === vehicle.id);
-        if (v) { v.lat = latlng.lat; v.lon = latlng.lng; if (addr) v.geraetehaus = addr; saveData(); renderVehicleList(); e.target.setTooltipContent(getHomeTooltip(v)); if (selectedLat && selectedLon) calculateAndShowRoute(); }
-      });
-      homeMarkers[vehicle.id].on('click', () => openModal(vehicle.id));
-    }
-
-    function getHomeTooltip(vehicle) {
-      let tooltip = `<strong>${escapeHtml(vehicle.rufname)}</strong><br>${escapeHtml(vehicle.fahrzeugTyp)}<br>${escapeHtml(vehicle.geraetehaus)}`;
-      if (vehicle.telefon) tooltip += `<br>📞 ${escapeHtml(vehicle.telefon)}`;
-      if (vehicle.ausruestung && vehicle.ausruestung.trim()) { tooltip += `<br><br><strong style="color:#6d4aff;">Ausrüstung:</strong><br><span style="font-size:12px;">${escapeHtml(vehicle.ausruestung)}</span>`; }
-      if (vehicle.assignedMissions && vehicle.assignedMissions.length > 0) {
-        const activeCount = vehicle.assignedMissions.filter(mid => {
-          const m = missions.find(x => x.id === mid);
-          return m && !m.phases.erledigt;
-        }).length;
-        if (activeCount > 0) tooltip += `<br><br><strong style="color:#e74c3c;">${activeCount} aktive Einsätze</strong>`;
-      }
-      return tooltip;
-    }
-
-    function placeMissionMarker(mission, forceRedraw = false) {
-      if (missionMarkers[mission.id] && !forceRedraw) return;
-      if (missionMarkers[mission.id]) map.removeLayer(missionMarkers[mission.id]);
-      const vehicleCount = mission.vehicleIds ? mission.vehicleIds.length : 0;
-      const emoji = vehicleCount > 1 ? '🚒🚒' : '🚒';
-      missionMarkers[mission.id] = L.marker([mission.lat, mission.lon], { icon: makeIcon('truck', emoji), draggable: false, keyboard: false, riseOnHover: true, id: mission.id })
-        .addTo(map).bindTooltip(getMissionTooltip(mission), { direction: 'top', offset: [0, -18], sticky: true });
-    }
-
-    function getMissionTooltip(mission) {
-      const vehicleNames = (mission.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : null; }).filter(Boolean);
-      const phases = getPhaseLabels(mission);
-      return `<strong>Einsatz ${mission.missionNumber || '?'}</strong><br>${escapeHtml(mission.address)}<br>${vehicleNames.length} Fahrzeug(e)<br>${phases}`;
-    }
-
-    function getPhaseLabels(mission) {
-      const phases = [];
-      if (mission.phases.alarm) phases.push('🚨 Alarm');
-      if (mission.phases.abfahrt) phases.push('🚙 Abfahrt');
-      if (mission.phases.ankunft) phases.push('🏁 Ankunft');
-      if (mission.phases.erledigt) phases.push('✅ Erledigt');
-      return phases.join(' · ') || '📋 Geplant';
-    }
-
-    function removePreviewMarker() { if (missionMarker) { map.removeLayer(missionMarker); missionMarker = null; } }
-    function clearRoute() { Object.values(routeLines).forEach(l => map.removeLayer(l)); routeLines = {}; document.getElementById('route-info').innerHTML = ''; document.getElementById('route-info').classList.remove('visible'); }
-
-    async function geocode(query) { const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`; const res = await fetch(url, { headers: { 'Accept': 'application/json' } }); if (res.status === 403) throw new Error('Geocoding blockiert'); if (!res.ok) throw new Error('Geocoding fehlgeschlagen'); const data = await res.json(); return data.length ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) } : null; }
-
-    async function reverseGeocode(lat, lon) { try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`); const data = await res.json(); return data.display_name || null; } catch { return null; } }
-
-    async function resolveAddress(address) {
-      if (!address) { removePreviewMarker(); selectedLat = null; selectedLon = null; clearRoute(); document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; return; }
-      try { const hit = await geocode(address); if (!hit) { document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>'; return; } selectedLat = hit.lat; selectedLon = hit.lon; removePreviewMarker(); missionMarker = L.marker([selectedLat, selectedLon], { icon: makeIcon('target', '🎯'), interactive: false }).addTo(map); map.flyTo([selectedLat, selectedLon], 14); fillVehicleOptions(selectedLat, selectedLon); calculateAndShowRoute(); } catch { document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>'; }
-    }
-
-    async function calculateAndShowRoute() {
-      if (!selectedLat || !selectedLon) { clearRoute(); return; }
-      const vehicleId = document.getElementById('vehicle-select').value; if (!vehicleId) { clearRoute(); return; }
-      const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle || vehicle.status !== 'einsatzbereit') { clearRoute(); return; }
-      try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${vehicle.lon},${vehicle.lat};${selectedLon},${selectedLat}?overview=full&geometries=geojson`;
-        const res = await fetch(url); if (!res.ok) throw new Error();
-        const data = await res.json(); if (!data.routes?.length) throw new Error();
-        const route = data.routes[0]; const distanceKm = (route.distance / 1000).toFixed(1); const durationMin = Math.round(route.duration / 60);
-        const latLngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
-        if (routeLines['preview']) map.removeLayer(routeLines['preview']);
-        routeLines['preview'] = L.polyline(latLngs, { color: '#6d4aff', weight: 5, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
-        const infoDiv = document.getElementById('route-info'); infoDiv.innerHTML = `🛣️ <strong>Route:</strong> ${distanceKm} km · ca. ${durationMin} min`; infoDiv.classList.add('visible');
-        map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
-      } catch { const infoDiv = document.getElementById('route-info'); const v = vehicles.find(v => v.id === document.getElementById('vehicle-select').value); infoDiv.innerHTML = `ℹ️ Luftlinie: ${haversine(v?.lat, v?.lon, selectedLat, selectedLon).toFixed(1)} km`; infoDiv.classList.add('visible'); }
-    }
-
-    function fillVehicleOptions(lat, lon) {
-      const select = document.getElementById('vehicle-select');
-      if (lat == null || lon == null) { select.innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; clearRoute(); return; }
-      const verfuegbar = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id) && v.lat != null && v.lon != null).map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) })).sort((a, b) => a.dist - b.dist);
-      if (!verfuegbar.length) { select.innerHTML = '<option value="">-- Kein freies Fahrzeug verfügbar --</option>'; clearRoute(); return; }
-      select.innerHTML = '<option value="">-- Fahrzeug wählen --</option>' + verfuegbar.map(({ v, dist }) => `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`).join('');
-      select.onchange = () => calculateAndShowRoute();
-    }
-
-    function haversine(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
-
-    function isVehicleBusy(vehicleId) {
-      const v = vehicles.find(x => x.id === vehicleId);
-      if (!v || !v.assignedMissions) return false;
-      return v.assignedMissions.some(mid => {
-        const m = missions.find(x => x.id === mid);
-        return m && !m.phases.erledigt;
-      });
-    }
-
-    function generateUniqueMissionNumber() {
-      const now = new Date(); const yyyy = now.getFullYear(), mm = String(now.getMonth() + 1).padStart(2, '0'), dd = String(now.getDate()).padStart(2, '0');
-      const hh = String(now.getHours()).padStart(2, '0'), min = String(now.getMinutes()).padStart(2, '0'), ss = String(now.getSeconds()).padStart(2, '0'), ms = String(now.getMilliseconds()).padStart(3, '0');
-      const baseNum = `${dd}${mm}${yyyy}-${hh}${min}${ss}`, fullNum = `${baseNum}.${ms}`;
-      let attempts = 0, uniqueNum = fullNum; while (missions.some(m => m.missionNumber === uniqueNum) && attempts < 100) { const extraMs = String(now.getMilliseconds() + attempts + 1).padStart(3, '0'); uniqueNum = `${baseNum}.${extraMs}`; attempts++; }
-      return uniqueNum;
-    }
-
-    function createMission() {
-      const vehicleId = document.getElementById('vehicle-select').value;
-      const address = document.getElementById('mission-address').value.trim();
-      
-      if (!selectedLat || !selectedLon) return alert('Erstens Einsatzadresse festlegen.'); 
-      if (!vehicleId) return alert('Bitte Fahrzeug auswählen.');
-      
-      const vehicle = vehicles.find(v => v.id === vehicleId); 
-      if (!vehicle) return alert('Fahrzeug nicht gefunden.'); 
-      if (isVehicleBusy(vehicleId)) return alert('Fahrzeug belegt.');
-      
-      const missionNumber = generateUniqueMissionNumber();
-      const mission = { 
-        id: 'm' + Date.now(), 
-        missionNumber, 
-        address, 
-        lat: selectedLat, 
-        lon: selectedLon, 
-        vehicleIds: [vehicleId],
-        phases: { alarm: new Date().toISOString(), abfahrt: null, ankunft: null, erledigt: null },
-        notes: [],
-        createdAt: new Date().toISOString(), 
-        completedAt: null 
-      };
-      missions.push(mission); 
-      
-      if (!vehicle.assignedMissions) vehicle.assignedMissions = [];
-      vehicle.assignedMissions.push(mission.id);
-      
-      saveData();
-      placeMissionMarker(mission); 
-      missionMarkers[mission.id]?.getElement()?.classList.add('jump-animation'); 
-      setTimeout(() => missionMarkers[mission.id]?.getElement()?.classList.remove('jump-animation'), 700);
-      map.flyTo([mission.lat, mission.lon], 15); 
-      clearRoute(); 
-      clearMission(); 
-      renderStats(); 
-      renderVehicleList(); 
-      renderHistory(); 
-    }
-
-    function openMissionModal(missionId) {
-      currentEditingMissionId = missionId;
-      const mission = missions.find(m => m.id === missionId);
-      if (!mission) return;
-      
-      document.getElementById('mission-modal-title').textContent = `Einsatz ${mission.missionNumber || '?'}`;
-      document.getElementById('detail-mission-number').textContent = mission.missionNumber || '-';
-      document.getElementById('detail-address').textContent = mission.address;
-      document.getElementById('detail-created').textContent = new Date(mission.createdAt).toLocaleString('de-DE');
-      
-      renderPhaseBadges(mission);
-      renderVehicleChips(mission);
-      renderNotesList(mission);
-      
-      document.getElementById('btn-complete-mission').style.display = mission.phases.erledigt ? 'none' : 'inline-block';
-      document.getElementById('mission-modal').classList.add('active');
-    }
-
-    function renderPhaseBadges(mission) {
-      const container = document.getElementById('phase-badges');
-      const phases = [
-        { key: 'alarm', label: '🚨 Alarm', class: 'alarm' },
-        { key: 'abfahrt', label: '🚙 Abfahrt', class: 'abfahrt' },
-        { key: 'ankunft', label: '🏁 Ankunft', class: 'ankunft' },
-        { key: 'erledigt', label: '✅ Erledigt', class: 'erledigt' }
-      ];
-      container.innerHTML = phases.map(p => {
-        const active = mission.phases[p.key];
-        return `<span class="phase-badge ${active ? p.class : 'phase-pending'}" onclick="setPhase('${p.key}')">${p.label}${active ? ' ' + formatTime(active) : ''}</span>`;
-      }).join('');
-    }
-
-    function formatTime(isoString) {
-      const d = new Date(isoString);
-      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    }
-
-    function setPhase(phaseKey) {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      if (!mission) return;
-      
-      if (mission.phases[phaseKey]) {
-        if (!confirm(`Phase "${phaseKey}" zurücksetzen?`)) return;
-        mission.phases[phaseKey] = null;
-      } else {
-        const order = ['alarm', 'abfahrt', 'ankunft', 'erledigt'];
-        const currentIndex = order.indexOf(phaseKey);
-        for (let i = 0; i < currentIndex; i++) {
-          if (!mission.phases[order[i]]) return alert(`Bitte erst Phase "${order[i]}" setzen.`);
-        }
-        mission.phases[phaseKey] = new Date().toISOString();
-        
-        if (phaseKey === 'erledigt') {
-          mission.vehicleIds.forEach(vid => {
-            const v = vehicles.find(x => x.id === vid);
-            if (v && v.assignedMissions) {
-              v.assignedMissions = v.assignedMissions.filter(mid => mid !== mission.id);
-            }
-          });
-          mission.completedAt = new Date().toISOString();
-          if (missionMarkers[mission.id]) { map.removeLayer(missionMarkers[mission.id]); delete missionMarkers[mission.id]; }
-        }
-      }
-      
-      saveData();
-      renderPhaseBadges(mission);
-      renderStats();
-      renderVehicleList();
-      renderHistory();
-      if (missionMarkers[mission.id]) { missionMarkers[mission.id].setTooltipContent(getMissionTooltip(mission)); }
-    }
-
-    function renderVehicleChips(mission) {
-      const container = document.getElementById('vehicle-chips-container');
-      if (!mission.vehicleIds || mission.vehicleIds.length === 0) {
-        container.innerHTML = '<p style="color:#666; font-size:13px;">Keine Fahrzeuge zugewiesen</p>';
-        return;
-      }
-      container.innerHTML = `<div class="vehicle-chip-container">${mission.vehicleIds.map(vid => {
-        const v = vehicles.find(x => x.id === vid);
-        if (!v) return '';
-        return `<div class="vehicle-chip">${escapeHtml(v.rufname)} <span class="remove" onclick="removeVehicleFromMission('${vid}')">×</span></div>`;
-      }).join('')}</div>`;
-    }
-
-    function removeVehicleFromMission(vehicleId) {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      if (!mission) return;
-      const vehicle = vehicles.find(v => v.id === vehicleId);
-      if (!vehicle) return;
-      
-      if (!confirm(`${vehicle.rufname} aus Einsatz entfernen?`)) return;
-      
-      mission.vehicleIds = mission.vehicleIds.filter(vid => vid !== vehicleId);
-      vehicle.assignedMissions = vehicle.assignedMissions.filter(mid => mid !== mission.id);
-      
-      saveData();
-      renderVehicleChips(mission);
-      renderStats();
-      renderVehicleList();
-    }
-
-    function showVehicleSelectorForMission() {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      if (!mission) return;
-      
-      const container = document.getElementById('vehicle-selector-list');
-      const available = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id) && v.lat && v.lon);
-      
-      if (available.length === 0) {
-        container.innerHTML = '<p style="padding:20px; text-align:center; color:#888;">Keine freien Fahrzeuge verfügbar.</p>';
-      } else {
-        container.innerHTML = available.map(v => `
-          <div class="vehicle-item" style="cursor:pointer;" onclick="addVehicleToMission('${v.id}')">
-            <div class="vehicle-info">
-              <div class="status-dot einsatzbereit"></div>
-              <div>
-                <div class="vehicle-main">${escapeHtml(v.rufname)}</div>
-                <div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div>
-              </div>
-            </div>
-            <button style="background:#6d4aff; color:white; border:none; padding:6px 12px; border-radius:6px;">Hinzufügen</button>
-          </div>
-        `).join('');
-      }
-      
-      document.getElementById('vehicle-selector-modal').classList.add('active');
-    }
-
-    function addVehicleToMission(vehicleId) {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      const vehicle = vehicles.find(v => v.id === vehicleId);
-      if (!mission || !vehicle) return;
-      
-      mission.vehicleIds.push(vehicleId);
-      vehicle.assignedMissions.push(mission.id);
-      
-      saveData();
-      placeMissionMarker(mission);
-      renderVehicleChips(mission);
-      closeVehicleSelectorModal();
-      renderStats();
-      renderVehicleList();
-      renderHistory();
-    }
-
-    function closeVehicleSelectorModal() { document.getElementById('vehicle-selector-modal').classList.remove('active'); }
-
-    function renderNotesList(mission) {
-      const container = document.getElementById('notes-list');
-      if (!mission.notes || mission.notes.length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-      container.innerHTML = mission.notes.map(note => `
-        <div class="note-item">
-          <div class="note-meta">${note.author || 'Unbekannt'} · ${new Date(note.timestamp).toLocaleString('de-DE')}</div>
-          <div class="note-text">${escapeHtml(note.text)}</div>
-        </div>
-      `).join('');
-    }
-
-    function addNoteToMission() {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      const text = document.getElementById('mission-note-text').value.trim();
-      if (!mission || !text) return;
-      
-      mission.notes.push({ text, timestamp: new Date().toISOString(), author: 'Bediener' });
-      
-      document.getElementById('mission-note-text').value = '';
-      saveData();
-      renderNotesList(mission);
-    }
-
-    function completeMission() {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      if (!mission) return;
-      
-      if (!confirm('Einsatz als abgeschlossen markieren? Alle Fahrzeuge werden freigegeben.')) return;
-      setPhase('erledigt');
-      closeMissionModal();
-    }
-
-    function deleteMissionFromModal() {
-      const mission = missions.find(m => m.id === currentEditingMissionId);
-      if (!mission) return;
-      
-      if (!confirm(`Einsatz ${mission.missionNumber || '?'} löschen?`)) return;
-      
-      (mission.vehicleIds || []).forEach(vid => {
+    mission.phases[phaseKey] = new Date().toISOString();
+    
+    if (phaseKey === 'erledigt') {
+      // Alle Fahrzeuge freigeben
+      mission.vehicleIds.forEach(vid => {
         const v = vehicles.find(x => x.id === vid);
         if (v && v.assignedMissions) {
           v.assignedMissions = v.assignedMissions.filter(mid => mid !== mission.id);
         }
       });
-      
+      mission.completedAt = new Date().toISOString();
       if (missionMarkers[mission.id]) { map.removeLayer(missionMarkers[mission.id]); delete missionMarkers[mission.id]; }
-      missions = missions.filter(m => m.id !== mission.id);
-      saveData();
-      closeMissionModal();
-      renderStats();
-      renderVehicleList();
-      renderHistory();
     }
+  }
+  
+  saveData();
+  renderPhaseBadges(mission);
+  renderStats();
+  renderVehicleList();
+  renderHistory();
+  if (missionMarkers[mission.id]) { missionMarkers[mission.id].setTooltipContent(getMissionTooltip(mission)); }
+}
 
-    function closeMissionModal() { 
-      document.getElementById('mission-modal').classList.remove('active'); 
-      currentEditingMissionId = null; 
+function renderVehicleChips(mission) {
+  const container = document.getElementById('vehicle-chips-container');
+  if (!mission.vehicleIds || mission.vehicleIds.length === 0) {
+    container.innerHTML = '<p style="color:#666; font-size:13px;">Keine Fahrzeuge zugewiesen</p>';
+    return;
+  }
+  container.innerHTML = `<div class="vehicle-chip-container">${mission.vehicleIds.map(vid => {
+    const v = vehicles.find(x => x.id === vid);
+    if (!v) return '';
+    return `<div class="vehicle-chip">${escapeHtml(v.rufname)} <span class="remove" onclick="removeVehicleFromMission('${vid}')">×</span></div>`;
+  }).join('')}</div>`;
+}
+
+function removeVehicleFromMission(vehicleId) {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  if (!mission) return;
+  const vehicle = vehicles.find(v => v.id === vehicleId);
+  if (!vehicle) return;
+  
+  if (!confirm(`${vehicle.rufname} aus Einsatz entfernen?`)) return;
+  
+  mission.vehicleIds = mission.vehicleIds.filter(vid => vid !== vehicleId);
+  vehicle.assignedMissions = vehicle.assignedMissions.filter(mid => mid !== mission.id);
+  
+  saveData();
+  renderVehicleChips(mission);
+  renderStats();
+  renderVehicleList();
+}
+
+function showVehicleSelectorForMission() {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  if (!mission) return;
+  
+  const container = document.getElementById('vehicle-selector-list');
+  const available = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id) && v.lat && v.lon);
+  
+  if (available.length === 0) {
+    container.innerHTML = '<p style="padding:20px; text-align:center; color:#888;">Keine freien Fahrzeuge verfügbar.</p>';
+  } else {
+    container.innerHTML = available.map(v => `
+      <div class="vehicle-item" style="cursor:pointer;" onclick="addVehicleToMission('${v.id}')">
+        <div class="vehicle-info">
+          <div class="status-dot einsatzbereit"></div>
+          <div>
+            <div class="vehicle-main">${escapeHtml(v.rufname)}</div>
+            <div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div>
+          </div>
+        </div>
+        <button style="background:#6d4aff; color:white; border:none; padding:6px 12px; border-radius:6px;">Hinzufügen</button>
+      </div>
+    `).join('');
+  }
+  
+  document.getElementById('vehicle-selector-modal').classList.add('active');
+}
+
+function addVehicleToMission(vehicleId) {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  const vehicle = vehicles.find(v => v.id === vehicleId);
+  if (!mission || !vehicle) return;
+  
+  mission.vehicleIds.push(vehicleId);
+  vehicle.assignedMissions.push(mission.id);
+  
+  saveData();
+  placeMissionMarker(mission);
+  renderVehicleChips(mission);
+  closeVehicleSelectorModal();
+  renderStats();
+  renderVehicleList();
+  renderHistory();
+}
+
+function closeVehicleSelectorModal() { document.getElementById('vehicle-selector-modal').classList.remove('active'); }
+
+function renderNotesList(mission) {
+  const container = document.getElementById('notes-list');
+  if (!mission.notes || mission.notes.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = mission.notes.map(note => `
+    <div class="note-item">
+      <div class="note-meta">${note.author || 'Unbekannt'} · ${new Date(note.timestamp).toLocaleString('de-DE')}</div>
+      <div class="note-text">${escapeHtml(note.text)}</div>
+    </div>
+  `).join('');
+}
+
+function addNoteToMission() {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  const text = document.getElementById('mission-note-text').value.trim();
+  if (!mission || !text) return;
+  
+  mission.notes.push({
+    text,
+    timestamp: new Date().toISOString(),
+    author: 'Bediener'
+  });
+  
+  document.getElementById('mission-note-text').value = '';
+  saveData();
+  renderNotesList(mission);
+}
+
+function completeMission() {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  if (!mission) return;
+  
+  if (!confirm('Einsatz als abgeschlossen markieren? Alle Fahrzeuge werden freigegeben.')) return;
+  setPhase('erledigt');
+  closeMissionModal();
+}
+
+function deleteMissionFromModal() {
+  const mission = missions.find(m => m.id === currentEditingMissionId);
+  if (!mission) return;
+  
+  if (!confirm(`Einsatz ${mission.missionNumber || '?'} löschen? Dies kann nicht rückgängig gemacht werden.`)) return;
+  
+  // Fahrzeuge freigeben
+  (mission.vehicleIds || []).forEach(vid => {
+    const v = vehicles.find(x => x.id === vid);
+    if (v && v.assignedMissions) {
+      v.assignedMissions = v.assignedMissions.filter(mid => mid !== mission.id);
     }
+  });
+  
+  if (missionMarkers[mission.id]) { map.removeLayer(missionMarkers[mission.id]); delete missionMarkers[mission.id]; }
+  missions = missions.filter(m => m.id !== mission.id);
+  saveData();
+  closeMissionModal();
+  renderStats();
+  renderVehicleList();
+  renderHistory();
+}
 
-    function renderStats() {
-      const total = vehicles.length;
-      const activeMissions = missions.filter(m => !m.phases.erledigt).length;
-      const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
-      const vehiclesInMission = vehicles.filter(v => isVehicleBusy(v.id)).length;
-      const ready = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id)).length;
-      
-      document.getElementById('stat-total').textContent = total; 
-      document.getElementById('stat-ready').textContent = ready; 
-      document.getElementById('stat-active').textContent = activeMissions; 
-      document.getElementById('stat-today').textContent = todayCount;
-      
-      const delta = document.getElementById('stat-ready-delta'); 
-      delta.textContent = ready >= total ? 'Alle frei' : ready > 0 ? `${vehiclesInMission} im Einsatz` : 'Keine frei';
-      delta.className = ready >= total ? 'stat-delta positive' : 'stat-delta neutral';
-    }
+function closeMissionModal() { 
+  document.getElementById('mission-modal').classList.remove('active'); 
+  currentEditingMissionId = null; 
+}
 
-    function clearMission() { document.getElementById('mission-address').value = ''; document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); }
+/* ========== Bestehende Funktionen ========== */
+function generateUniqueMissionNumber() {
+  const now = new Date(); const yyyy = now.getFullYear(), mm = String(now.getMonth() + 1).padStart(2, '0'), dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0'), min = String(now.getMinutes()).padStart(2, '0'), ss = String(now.getSeconds()).padStart(2, '0'), ms = String(now.getMilliseconds()).padStart(3, '0');
+  const baseNum = `${dd}${mm}${yyyy}-${hh}${min}${ss}`, fullNum = `${baseNum}.${ms}`;
+  let attempts = 0, uniqueNum = fullNum; while (missions.some(m => m.missionNumber === uniqueNum) && attempts < 100) { const extraMs = String(now.getMilliseconds() + attempts + 1).padStart(3, '0'); uniqueNum = `${baseNum}.${extraMs}`; attempts++; }
+  return uniqueNum;
+}
 
-    function renderVehicleList(filterQuery = '') {
-      const container = document.getElementById('vehicle-list'), query = filterQuery.toLowerCase().trim();
-      if (!vehicles.length) { container.innerHTML = '<div style="padding:18px;color:#888;">Noch keine Fahrzeuge.</div>'; return; }
-      const sorted = [...vehicles].sort((a, b) => a.geraetehaus.localeCompare(b.geraetehaus, 'de') || a.rufname.localeCompare(b.rufname, 'de'));
-      container.innerHTML = sorted.map(v => {
-        const matches = query === '' || v.rufname.toLowerCase().includes(query) || v.fahrzeugTyp.toLowerCase().includes(query) || v.geraetehaus.toLowerCase().includes(query) || (v.telefon && v.telefon.includes(query)) || (v.ausruestung && v.ausruestung.toLowerCase().includes(query));
-        const highlightClass = query && matches ? 'match' : '', hiddenClass = query && !matches ? 'hidden' : '';
-        const phoneDisplay = v.telefon ? `<span class="phone-number">📞 ${escapeHtml(v.telefon)}</span>` : '';
-        const busyCount = (v.assignedMissions || []).filter(mid => { const m = missions.find(x => x.id === mid); return m && !m.phases.erledigt; }).length;
-        return `<div class="vehicle-item ${highlightClass} ${hiddenClass}" data-id="${v.id}"><div class="vehicle-info"><div class="status-dot ${v.status}" title="${statusLabel(v.status)}"></div><div style="min-width:0;"><div class="vehicle-main">${escapeHtml(v.rufname)} ${busyCount > 0 ? `<span class="badge">🚨 ${busyCount} EINSÄTZE</span>` : ''} ${phoneDisplay}</div><div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div></div></div><div class="vehicle-actions"><button onclick="openModal('${v.id}')">✏️</button><button onclick="deleteVehicleById('${v.id}')">🗑️</button></div></div>`;
-      }).join('');
-    }
+function renderStats() {
+  const total = vehicles.length;
+  const activeMissions = missions.filter(m => !m.phases.erledigt).length;
+  const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
+  const vehiclesInMission = vehicles.filter(v => isVehicleBusy(v.id)).length;
+  const ready = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id)).length;
+  
+  document.getElementById('stat-total').textContent = total; 
+  document.getElementById('stat-ready').textContent = ready; 
+  document.getElementById('stat-active').textContent = activeMissions; 
+  document.getElementById('stat-today').textContent = todayCount;
+  
+  const delta = document.getElementById('stat-ready-delta'); 
+  delta.textContent = ready >= total ? 'Alle frei' : ready > 0 ? `${vehiclesInMission} im Einsatz` : 'Keine frei';
+  delta.className = ready >= total ? 'stat-delta positive' : 'stat-delta neutral';
+}
 
-    function filterVehicles() { renderVehicleList(document.getElementById('vehicle-search').value); }
-    function statusLabel(s) { return { einsatzbereit: 'Einsatzbereit', nicht_einsatzbereit: 'Nicht einsatzbereit', unklar: 'Verfügbarkeit unklar' }[s] || s; }
+function clearMission() { document.getElementById('mission-address').value = ''; document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); }
 
-    function renderHistory() {
-      const tbody = document.getElementById('history-body');
-      if (!missions.length) { 
-        tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#888;">Keine Einsätze</td></tr>'; 
-        return; 
-      }
-      const sorted = [...missions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      tbody.innerHTML = sorted.map(m => {
-        const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : null; }).filter(Boolean).join(', ');
-        const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : null; }).filter(Boolean).join(', ');
-        const created = new Date(m.createdAt);
-        const completed = m.phases.erledigt ? new Date(m.phases.erledigt) : null;
-        const duration = completed ? Math.round((completed - created) / 60000) : null; 
-        const status = m.phases.erledigt 
-          ? 'Erledigt' 
-          : (m.phases.ankunft ? 'Vor Ort' : (m.phases.abfahrt ? 'Unterwegs' : 'Alarmiert'));
-        const statusColor = m.phases.erledigt ? '#2ecc71' : (m.phases.ankunft ? '#8b5cf6' : '#e74c3c');
-        
-        return `<tr data-mission-id="${m.id}" style="cursor:pointer;" onclick="openMissionModal('${m.id}')">
-          <td><strong>${escapeHtml(m.missionNumber || '-')}</strong></td>
-          <td>${created.toLocaleString('de-DE')}</td>
-          <td>${escapeHtml(vehicleNames) || '-'}</td>
-          <td>${escapeHtml(vehicleTypes) || '-'}</td>
-          <td>${escapeHtml(m.address)}</td>
-          <td>${duration ?? '-'}</td>
-          <td style="color:${statusColor}">${status}</td>
-        </tr>`;
-      }).join('');
-    }
+function renderVehicleList(filterQuery = '') {
+  const container = document.getElementById('vehicle-list'), query = filterQuery.toLowerCase().trim();
+  if (!vehicles.length) { container.innerHTML = '<div style="padding:18px;color:#888;">Noch keine Fahrzeuge.</div>'; return; }
+  const sorted = [...vehicles].sort((a, b) => a.geraetehaus.localeCompare(b.geraetehaus, 'de') || a.rufname.localeCompare(b.rufname, 'de'));
+  container.innerHTML = sorted.map(v => {
+    const matches = query === '' || v.rufname.toLowerCase().includes(query) || v.fahrzeugTyp.toLowerCase().includes(query) || v.geraetehaus.toLowerCase().includes(query) || (v.telefon && v.telefon.includes(query)) || (v.ausruestung && v.ausruestung.toLowerCase().includes(query));
+    const highlightClass = query && matches ? 'match' : '', hiddenClass = query && !matches ? 'hidden' : '';
+    const phoneDisplay = v.telefon ? `<span class="phone-number">📞 ${escapeHtml(v.telefon)}</span>` : '';
+    const busyCount = (v.assignedMissions || []).filter(mid => { const m = missions.find(x => x.id === mid); return m && !m.phases.erledigt; }).length;
+    return `<div class="vehicle-item ${highlightClass} ${hiddenClass}" data-id="${v.id}"><div class="vehicle-info"><div class="status-dot ${v.status}" title="${statusLabel(v.status)}"></div><div style="min-width:0;"><div class="vehicle-main">${escapeHtml(v.rufname)} ${busyCount > 0 ? `<span class="badge">🚨 ${busyCount} EINSÄTZE</span>` : ''} ${phoneDisplay}</div><div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div></div></div><div class="vehicle-actions"><button onclick="openModal('${v.id}')">✏️</button><button onclick="deleteVehicleById('${v.id}')">🗑️</button></div></div>`;
+  }).join('');
+}
 
-    function toggleHistory() { document.getElementById('history-panel').classList.toggle('expanded'); }
+function filterVehicles() { renderVehicleList(document.getElementById('vehicle-search').value); }
+function statusLabel(s) { return { einsatzbereit: 'Einsatzbereit', nicht_einsatzbereit: 'Nicht einsatzbereit', unklar: 'Verfügbarkeit unklar' }[s] || s; }
 
-    function exportHistory() {
-      if (!missions.length) return alert('Keine Historie');
-      const headers = ['Einsatz-Nr', 'Datum', 'Fahrzeuge', 'Typen', 'Adresse', 'Dauer', 'Status'];
-      const rows = missions.map(m => { 
-        const created = new Date(m.createdAt), completed = m.phases.erledigt ? new Date(m.phases.erledigt) : null;
-        const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : ''; }).join('; ');
-        const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : ''; }).join('; ');
-        const duration = completed
+function renderHistory() {
+  const tbody = document.getElementById('history-body');
+  if (!missions.length) { tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#888;">Keine Einsätze</td></tr>'; return; }
+  const sorted = [...missions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  tbody.innerHTML = sorted.map(m => {
+    const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : null; }).filter(Boolean).join(', ');
+    const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : null; }).filter(Boolean).join(', ');
+    const created = new Date(m.createdAt), completed = m.phases.erledigt ? new Date(m.phases.erledigt) : null;
+    const duration = completed ? Math.round((completed - created) / 60000) : null; 
+    const status = m.phases.erledigt ? 'Erledigt' : (m.phases.ankunft ? 'Vor Ort' : (m.phases.abfahrt ? 'Unterwegs' : 'Alarmiert'));
+    const statusColor = m.phases.erledigt ? '#2ecc71' : (m.phases.ankunft ? '#8b5cf6' : '#e74c3c');
+    return `<tr style="cursor:pointer;" onclick="openMissionModal('${m.id}')"><td><strong>${escapeHtml(m.missionNumber || '-')}</strong></td><td>${created.toLocaleString('de-DE')}</td><td>${escapeHtml(vehicleNames) || '-'}</td><td>${escapeHtml(vehicleTypes) || '-'}</td><td>${escapeHtml(m.address)}</td><td>${duration ?? '-'}</td><td style="color:${statusColor}">${status}</td></tr>`;
+  }).join('');
+}
+
+function toggleHistory() { document.getElementById('history-panel').classList.toggle('expanded'); }
+
+function exportHistory() {
+  if (!missions.length) return alert('Keine Historie');
+  const headers = ['Einsatz-Nr', 'Datum', 'Fahrzeuge', 'Typen', 'Adresse', 'Dauer', 'Status'];
+  const rows = missions.map(m => { 
+    const created = new Date(m.createdAt), completed = m.phases.erledigt ? new Date(m.phases.erledigt) : null;
+    const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : ''; }).join('; ');
+    const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : ''; }).join('; ');
+    const duration = completed ? Math.round((completed - created) / 60000) : '';
+    const status = m.phases.erledigt ? 'Erledigt' : (m.phases.ankunft ? 'Vor Ort' : (m.phases.abfahrt ? 'Unterwegs' : 'Alarmiert'));
+    return [m.missionNumber || '', created.toISOString(), `"${vehicleNames}"`, `"${vehicleTypes}"`, `"${m.address.replace(/"/g,'""')}"`, duration, status].join(','); 
+  });
+  const blob = new Blob([headers.join(',')+'\n'+rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `einsaete_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+}
+
+/* ========== Fahrzeugg-Modal ========== */
+function openModal(editId = null) {
+  currentEditingVehicleId = editId; 
+  const deleteBtn = document.getElementById('delete-btn');
+  if (editId) { 
+    const v = vehicles.find(x => x.id === editId); 
+    if (!v) return; 
+    document.getElementById('modal-title').textContent = 'Fahrzeug bearbeiten'; 
+    document.getElementById('form-geraetehaus').value = v.geraetehaus; 
+    document.getElementById('form-fahrzeugtyp').value = v.fahrzeugTyp; 
+    document.getElementById('form-rufname').value = v.rufname; 
+    document.getElementById('form-telefon').value = v.telefon || ''; 
+    document.getElementById('form-status').value = v.status; 
+    document.getElementById('form-ausruestung').value = v.ausruestung || ''; 
+    deleteBtn.style.display = 'inline-block'; 
+  }
+  else { 
+    document.getElementById('modal-title').textContent = 'Fahrzeug anlegen'; 
+    document.getElementById('form-geraetehaus').value = ''; 
+    document.getElementById('form-fahrzeugtyp').value = FAHRZEUGTYPEN[0]; 
+    document.getElementById('form-rufname').value = ''; 
+    document.getElementById('form-telefon').value = ''; 
+    document.getElementById('form-status').value = 'einsatzbereit'; 
+    document.getElementById('form-ausruestung').value = ''; 
+    deleteBtn.style.display = 'none'; 
+  }
+  drillModeActive = false; 
+  document.getElementById('modal').classList.add('active');
+}
+
+function openDrillMode() { 
+  currentEditingVehicleId = null; 
+  drillModeActive = true; 
+  document.getElementById('modal').classList.remove('active'); 
+  document.getElementById('drag-overlay').classList.add('active'); 
+  alert('Auf der Karte klicken'); 
+}
+
+function handleDrillClick(lat, lon) { 
+  drillModeActive = false; 
+  document.getElementById('drag-overlay').classList.remove('active'); 
+  (async () => { 
+    const addr = await reverseGeocode(lat, lon); 
+    openModal(null); 
+    document.getElementById('form-geraetehaus').value = addr || `${lat.toFixed(5)}, ${lon.toFixed(5)}`; 
+    document.getElementById('form-geraetehaus').dataset.tempLat = lat; 
+    document.getElementById('form-geraetehaus').dataset.tempLon = lon; 
+  })(); 
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('active'); currentEditingVehicleId = null; drillModeActive = false; }
+
+async function saveVehicle() {
+  const geraetehaus = document.getElementById('form-geraetehaus').value.trim();
+  const fahrzeugTyp = document.getElementById('form-fahrzeugtyp').value;
+  const rufname = document.getElementById('form-rufname').value.trim();
+  const telefon = document.getElementById('form-telefon').value.trim();
+  const status = document.getElementById('form-status').value;
+  const ausruestung = document.getElementById('form-ausruestung').value.trim();
+  if (!geraetehaus || !rufname) return alert('Pflichtfelder ausfüllen!');
+  const editing = currentEditingVehicleId ? vehicles.find(v => v.id === currentEditingVehicleId) : null;
+  let lat = editing?.lat ?? null, lon = editing?.lon ?? null;
+  const tempLat = document.getElementById('form-geraetehaus').dataset.tempLat;
+  const tempLon = document.getElementById('form-geraetehaus').dataset.tempLon;
+  if (tempLat && tempLon) { lat = parseFloat(tempLat); lon = parseFloat(tempLon); }
+  else if (!editing || editing.geraetehaus !== geraetehaus) { try { const hit = await geocode(geraetehaus); if (hit) { lat = hit.lat; lon = hit.lon; } else if (!editing) return alert('Adresse nicht gefunden.'); } catch { if (!editing) return alert('Geocoding fehlgeschlagen.'); } }
+  if (editing) { Object.assign(editing, { geraetehaus, fahrzeugtyp, rufname, telefon, status, ausruestung, lat, lon }); } else { vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, ausruestung, lat, lon, assignedMissions: [] }); }
+  saveData(); drawAllMarkers(); renderVehicleList(); closeModal(); if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
+}
+
+function deleteVehicleById(id) { const v = vehicles.find(x => x.id === id); if (!v) return; const busyCount = (v.assignedMissions || []).filter(mid => { const m = missions.find(x => x.id === mid); return m && !m.phases.erledigt; }).length; if (busyCount > 0) return alert(`Fahrzeug in ${busyCount} aktiven Einsatz(en).`); if (!confirm(`"${v.rufname}" löschen?`)) return; vehicles = vehicles.filter(x => x.id !== id); if (homeMarkers[id]) { map.removeLayer(homeMarkers[id]); delete homeMarkers[id]; } saveData(); renderVehicleList(); }
+
+function deleteVehicleFromModal() { if (currentEditingVehicleId) { const id = currentEditingVehicleId; closeModal(); deleteVehicleById(id); } }
+
+function escapeHtml(str) { return String(str ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+// Klick auf History-Reihe öffnet Mission-Modal
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('tr[data-mission-id]');
+  if (row) { const missionId = row.dataset.missionId; if (missionId) openMissionModal(missionId); }
+});
+</script>
+</body>
+</html>
