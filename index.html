@@ -408,7 +408,6 @@
 
     // ========== TEST-FUNKTION ==========
     function showAvailableVehicles() {
-      // Prüfe alle Fahrzeuge OHNE Adresse
       const available = vehicles.filter(v => {
         return v.status === 'einsatzbereit' && !v.assignedTo && v.lat != null && v.lon != null;
       });
@@ -459,8 +458,6 @@
       renderStats();
       renderHistory();
       bindMissionInput();
-      
-      // Sofort testen, was verfügbar ist
       showAvailableVehicles();
     });
 
@@ -486,6 +483,10 @@
 
         const addr = await reverseGeocode(e.latlng.lat, e.latlng.lng);
         if (addr) document.getElementById('mission-address').value = addr;
+        
+        // FIX: fillVehicleOptions aufrufen NACH dem Setzen von selectedLat/Lon
+        fillVehicleOptions(selectedLat, selectedLon);
+        
         calculateAndShowRoute();
       });
     }
@@ -514,6 +515,8 @@
         clearTimeout(geocodeTimer);
         selectedLat = null; selectedLon = null;
         removePreviewMarker(); clearRoute();
+        document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse eingeben --</option>';
+        document.getElementById('test-result').classList.remove('visible');
         geocodeTimer = setTimeout(() => resolveAddress(input.value.trim()), 950);
       });
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(geocodeTimer); resolveAddress(input.value.trim()); }});
@@ -625,16 +628,33 @@
     }
 
     async function resolveAddress(address) {
-      if (!address) { removePreviewMarker(); selectedLat = null; selectedLon = null; clearRoute(); fillVehicleOptions(null, null); return; }
+      if (!address) { 
+        removePreviewMarker(); 
+        selectedLat = null; 
+        selectedLon = null; 
+        clearRoute(); 
+        document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>';
+        return; 
+      }
       try {
         const hit = await geocode(address);
-        if (!hit) { fillVehicleOptions(null, null); return; }
-        selectedLat = hit.lat; selectedLon = hit.lon;
+        if (!hit) { 
+          document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>';
+          return; 
+        }
+        selectedLat = hit.lat; 
+        selectedLon = hit.lon;
         removePreviewMarker();
         missionMarker = L.marker([selectedLat, selectedLon], { icon: L.divIcon({ className: 'marker-wrapper mission-marker', html: '🎯', iconSize: [32, 32], iconAnchor: [16, 32] }) }).addTo(map);
         map.flyTo([selectedLat, selectedLon], 14);
+        
+        // FIX: fillVehicleOptions aufrufen NACH dem Setzen von selectedLat/Lon
+        fillVehicleOptions(selectedLat, selectedLon);
+        
         calculateAndShowRoute();
-      } catch { fillVehicleOptions(null, null); }
+      } catch { 
+        document.getElementById('vehicle-select').innerHTML = '<option value="">-- Adresse nicht gefunden --</option>';
+      }
     }
 
     async function calculateAndShowRoute() {
