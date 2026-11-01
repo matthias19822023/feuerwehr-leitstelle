@@ -159,7 +159,8 @@
     .modal h3 { margin-bottom: 18px; color: #6d4aff; }
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; margin-bottom: 5px; font-size: 13.5px; font-weight: 500; }
-    .form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
     .form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; flex-wrap: wrap; }
     .btn-save { background: #6d4aff; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; }
     .btn-delete { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; }
@@ -397,6 +398,12 @@
         </select>
       </div>
 
+      <!-- NEU: Ausrüstungsfeld -->
+      <div class="form-group">
+        <label>Ausrüstung (Freitext)</label>
+        <textarea id="form-ausruestung" placeholder="z. B. Atemschutzgeräteträger, Strömungspumpe, Motorpumpe MP 600/200..."></textarea>
+      </div>
+
       <div class="form-actions">
         <button class="btn-drill" onclick="openDrillMode()">📍 Standort setzen</button>
         <button class="btn-delete" id="delete-btn" onclick="deleteVehicleFromModal()" style="display:none;">Löschen</button>
@@ -427,9 +434,9 @@
 
   <script>
     const FAHRZEUGTYPEN = ['ELW 1', 'HLF10', 'HLF20', 'LF10', 'LF20', 'TSF', 'TSF-W', 'TLF16/25', 'TLF8/8', 'FwA-ÖSA', 'FwA-GTR', 'DLK', 'MTW', 'Argo8*8', 'MZF'];
-    const STORAGE_VEHICLES = 'fw_vehicles_v10';
-    const STORAGE_MISSIONS  = 'fw_missions_v10';
-    const DEFAULT_RESET_PIN = '1234'; // Standard-PIN für Historien-Reset
+    const STORAGE_VEHICLES = 'fw_vehicles_v11';
+    const STORAGE_MISSIONS  = 'fw_missions_v11';
+    const DEFAULT_RESET_PIN = '1234';
 
     let map;
     let vehicles = [];
@@ -467,7 +474,6 @@
       document.getElementById('pin-modal').classList.remove('active');
     }
 
-    // PIN-Eingabe-Handling
     document.querySelectorAll('.pin-digit').forEach((input, idx) => {
       input.addEventListener('input', (e) => {
         if (e.target.value.length === 1 && idx < 3) {
@@ -501,13 +507,10 @@
         return;
       }
       
-      // Hier wird die Standard-PIN geprüft
-      // In Zukunft könnte man eine benutzerdefinierte PIN in localStorage speichern
       if (enteredPin !== DEFAULT_RESET_PIN) {
         feedback.textContent = '❌ Falsche PIN';
         feedback.className = 'pin-feedback error';
         
-        // Roter Rahmen auf allen Feldern
         document.querySelectorAll('.pin-digit').forEach(digit => {
           digit.style.borderColor = '#dc2626';
         });
@@ -521,7 +524,6 @@
         return;
       }
       
-      // PIN korrekt → Historie zurücksetzen
       feedback.textContent = '✅ Historie erfolgreich geleert';
       feedback.className = 'pin-feedback success';
       
@@ -532,7 +534,6 @@
         renderHistory();
         renderStats();
         
-        // Marker von der Karte entfernen
         Object.values(missionMarkers).forEach(m => map.removeLayer(m));
         missionMarkers = {};
       }, 1000);
@@ -617,9 +618,9 @@
         vehicles = JSON.parse(storedV);
       } else {
         vehicles = [
-          { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', lat: 48.7758, lon: 9.1829, assignedTo: null },
-          { id: 'v2', geraetehaus: 'Bahnhofstraße 5, 73728 Esslingen', fahrzeugTyp: 'DLK', rufname: 'Florian Esslingen 1/33-1', telefon: '0711 8765432', status: 'einsatzbereit', lat: 48.7395, lon: 9.3089, assignedTo: null },
-          { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '07141 112233', status: 'nicht_einsatzbereit', lat: 48.8974, lon: 9.1916, assignedTo: null }
+          { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', ausruestung: 'Atemschutz (3 Geräte), Rettungshundestaffel, Motorpumpe MP 600/200', lat: 48.7758, lon: 9.1829, assignedTo: null },
+          { id: 'v2', geraetehaus: 'Bahnhofstraße 5, 73728 Esslingen', fahrzeugTyp: 'DLK', rufname: 'Florian Esslingen 1/33-1', telefon: '0711 8765432', status: 'einsatzbereit', ausruestung: 'Drehleiter mit Korb (24m), Hochdruckreiniger', lat: 48.7395, lon: 9.3089, assignedTo: null },
+          { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '07141 112233', status: 'nicht_einsatzbereit', ausruestung: '', lat: 48.8974, lon: 9.1916, assignedTo: null }
         ];
         saveData();
       }
@@ -628,6 +629,7 @@
       vehicles.forEach(x => { 
         if (x.assignedTo === undefined) x.assignedTo = null;
         if (!x.telefon) x.telefon = '';
+        if (!x.ausruestung) x.ausruestung = '';
         if (x.lat === undefined) x.lat = null;
         if (x.lon === undefined) x.lon = null;
       });
@@ -663,7 +665,7 @@
 
       homeMarkers[vehicle.id] = L.marker(pos, { icon, draggable: true })
         .addTo(map)
-        .bindTooltip(getHomeTooltip(vehicle), { direction: 'top', offset: [0, -32] });
+        .bindTooltip(getHomeTooltip(vehicle), { direction: 'top', offset: [0, -32], sticky: true });
 
       homeMarkers[vehicle.id].on('dragend', async (e) => {
         const latlng = e.target.getLatLng();
@@ -681,9 +683,20 @@
       homeMarkers[vehicle.id].on('click', () => openModal(vehicle.id));
     }
 
+    // NEU: Tooltip mit Ausrüstung
     function getHomeTooltip(vehicle) {
-      const tel = vehicle.telefon ? `<br>📞 ${escapeHtml(vehicle.telefon)}` : '';
-      return `<strong>${escapeHtml(vehicle.rufname)}</strong><br>${escapeHtml(vehicle.fahrzeugTyp)}<br>${escapeHtml(vehicle.geraetehaus)}${tel}`;
+      let tooltip = `<strong>${escapeHtml(vehicle.rufname)}</strong><br>`;
+      tooltip += `${escapeHtml(vehicle.fahrzeugTyp)}<br>`;
+      tooltip += `${escapeHtml(vehicle.geraetehaus)}`;
+      if (vehicle.telefon) {
+        tooltip += `<br>📞 ${escapeHtml(vehicle.telefon)}`;
+      }
+      // Ausrüstung anzeigen (neu)
+      if (vehicle.ausruestung && vehicle.ausruestung.trim()) {
+        tooltip += `<br><br><strong style="color:#6d4aff;">Ausrüstung:</strong><br>`;
+        tooltip += `<span style="font-size:12px;color:#333;">${escapeHtml(vehicle.ausruestung)}</span>`;
+      }
+      return tooltip;
     }
 
     function placeMissionMarker(mission, forceRedraw = false) {
@@ -691,7 +704,7 @@
       const vehicle = vehicles.find(v => v.id === mission.vehicleId);
       missionMarkers[mission.id] = L.marker([mission.lat, mission.lon], {
         icon: L.divIcon({ className: 'marker-wrapper vehicle-marker', html: '🚒', iconSize: [32, 32], iconAnchor: [16, 32] })
-      }).addTo(map).bindTooltip(`<strong>${escapeHtml(vehicle?.rufname || '-')}</strong><br>${escapeHtml(mission.address)}`, { direction: 'top' });
+      }).addTo(map).bindTooltip(`<strong>${escapeHtml(vehicle?.rufname || '-')}</strong><br>${escapeHtml(mission.address)}`, { direction: 'top', sticky: true });
     }
 
     function removePreviewMarker() { if (missionMarker) { map.removeLayer(missionMarker); missionMarker = null; } }
@@ -808,7 +821,6 @@
     }
 
     function generateUniqueMissionNumber() {
-      // Generiert eine Nummer aus Datum + Uhrzeit + Mikrosekunde für Einzigartigkeit
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -821,7 +833,6 @@
       const baseNum = `${dd}${mm}${yyyy}-${hh}${min}${ss}`;
       const fullNum = `${baseNum}.${ms}`;
       
-      // Sicherstellen, dass Nummer noch nicht vergeben ist
       let attempts = 0;
       let uniqueNum = fullNum;
       while (missions.some(m => m.missionNumber === uniqueNum) && attempts < 100) {
@@ -858,7 +869,6 @@
       if (!vehicle) return alert('Fahrzeug nicht gefunden.');
       if (vehicle.assignedTo) return alert('Fahrzeug belegt.');
 
-      // Einzigartige Einsatznummer generieren
       const missionNumber = generateUniqueMissionNumber();
       
       const mission = { 
@@ -917,7 +927,7 @@
       const sorted = [...vehicles].sort((a, b) => a.geraetehaus.localeCompare(b.geraetehaus, 'de') || a.rufname.localeCompare(b.rufname, 'de'));
 
       container.innerHTML = sorted.map(v => {
-        const matches = query === '' || v.rufname.toLowerCase().includes(query) || v.fahrzeugTyp.toLowerCase().includes(query) || v.geraetehaus.toLowerCase().includes(query) || (v.telefon && v.telefon.includes(query));
+        const matches = query === '' || v.rufname.toLowerCase().includes(query) || v.fahrzeugTyp.toLowerCase().includes(query) || v.geraetehaus.toLowerCase().includes(query) || (v.telefon && v.telefon.includes(query)) || (v.ausruestung && v.ausruestung.toLowerCase().includes(query));
         const highlightClass = query && matches ? 'match' : '';
         const hiddenClass = query && !matches ? 'hidden' : '';
         const phoneDisplay = v.telefon ? `<span class="phone-number">📞 ${escapeHtml(v.telefon)}</span>` : '';
@@ -996,6 +1006,8 @@
         document.getElementById('form-rufname').value = v.rufname;
         document.getElementById('form-telefon').value = v.telefon || '';
         document.getElementById('form-status').value = v.status;
+        // NEU: Ausrüstungsfeld befüllen
+        document.getElementById('form-ausruestung').value = v.ausruestung || '';
         deleteBtn.style.display = 'inline-block';
       } else {
         document.getElementById('modal-title').textContent = 'Fahrzeug anlegen';
@@ -1004,6 +1016,7 @@
         document.getElementById('form-rufname').value = '';
         document.getElementById('form-telefon').value = '';
         document.getElementById('form-status').value = 'einsatzbereit';
+        document.getElementById('form-ausruestung').value = '';
         deleteBtn.style.display = 'none';
       }
       drillModeActive = false;
@@ -1020,6 +1033,8 @@
       const rufname = document.getElementById('form-rufname').value.trim();
       const telefon = document.getElementById('form-telefon').value.trim();
       const status = document.getElementById('form-status').value;
+      const ausruestung = document.getElementById('form-ausruestung').value.trim();
+      
       if (!geraetehaus || !rufname) return alert('Pflichtfelder ausfüllen!');
 
       const editing = currentEditingId ? vehicles.find(v => v.id === currentEditingId) : null;
@@ -1032,8 +1047,11 @@
         catch { if (!editing) return alert('Geocoding fehlgeschlagen.'); }
       }
 
-      if (editing) { Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon }); }
-      else { vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon, assignedTo: null }); }
+      if (editing) { 
+        Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, ausruestung, lat, lon }); 
+      } else { 
+        vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, ausruestung, lat, lon, assignedTo: null }); 
+      }
 
       saveData(); drawAllMarkers(); renderVehicleList(); closeModal();
       if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
