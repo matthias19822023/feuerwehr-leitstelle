@@ -373,8 +373,8 @@
       'Argo8*8', 'MZF'
     ];
 
-    const STORAGE_VEHICLES = 'fw_vehicles_v4';
-    const STORAGE_MISSIONS  = 'fw_missions_v4';
+    const STORAGE_VEHICLES = 'fw_vehicles_v5';
+    const STORAGE_MISSIONS  = 'fw_missions_v5';
 
     // ============================================================
     //  STATE
@@ -393,32 +393,37 @@
     let selectedVehicleForRouting = null;
     let currentLayer = 'osm';
     let drillModeActive = false;
-    let draggableMarkers = {};
 
     // ========== TILE LAYERS ==========
     const tileLayers = {
-      osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
       }),
       sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        attribution: '&copy; Esri'
+        attribution: 'Tiles &copy; Esri'
       }),
-      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      dark: L.tileLayer('https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '&copy; CartoDB'
+        attribution: '&copy; OpenStreetMap-Mitwirkende &copy; CARTO'
       })
     };
 
     // ============================================================
     //  INIT
     // ============================================================
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       fillTypeDropdowns();
       loadData();
+      
+      // FIX: Map erst initialisieren, dann Daten laden
       initMap();
+      
+      // Alle Marker zeichnen (inklusive Fahrzeuge)
       drawAllMarkers();
+      
+      // UI aktualisieren
       renderVehicleList();
       renderStats();
       renderHistory();
@@ -435,13 +440,9 @@
     function initMap() {
       map = L.map('map-container', { zoomControl: false }).setView([51.1657, 10.4515], 6);
       
-      // Zoom control rechts unten
       L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-      // Basis-Layer hinzufügen
       tileLayers.osm.addTo(map);
 
-      // Klick auf Karte (Einsatzadresse oder Drill-Mode)
       map.on('click', async (e) => {
         if (drillModeActive) {
           handleDrillClick(e.latlng.lat, e.latlng.lng);
@@ -461,34 +462,23 @@
 
         calculateAndShowRoute();
       });
-
-      // Drag & Drop auf Markern aktivieren
-      enableDraggableMarkers();
     }
 
     function setLayer(layerName) {
-      // Aktuelles Layer entfernen
       Object.values(tileLayers).forEach(l => map.removeLayer(l));
-      
-      // Neues Layer hinzufügen
       tileLayers[layerName].addTo(map);
       currentLayer = layerName;
 
-      // Buttons aktualisieren
       document.querySelectorAll('.map-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`layer-${layerName}`).classList.add('active');
-
-      // Marker neu zeichnen (wegen anderer Hintergrundfarbe)
       redrawAllMarkers();
     }
 
     function redrawAllMarkers() {
-      // Marker entfernen
       Object.values(homeMarkers).forEach(m => map.removeLayer(m));
       Object.values(missionMarkers).forEach(m => map.removeLayer(m));
       Object.values(routeLines).forEach(l => map.removeLayer(l));
 
-      // Wiederherstellen
       homeMarkers = {};
       missionMarkers = {};
       routeLines = {};
@@ -521,11 +511,11 @@
     //  PERSISTENZ
     // ============================================================
     function loadData() {
-      const v = localStorage.getItem(STORAGE_VEHICLES);
-      const m = localStorage.getItem(STORAGE_MISSIONS);
+      const storedVehicles = localStorage.getItem(STORAGE_VEHICLES);
+      const storedMissions = localStorage.getItem(STORAGE_MISSIONS);
 
-      if (v) {
-        vehicles = JSON.parse(v);
+      if (storedVehicles) {
+        vehicles = JSON.parse(storedVehicles);
       } else {
         vehicles = [
           { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', lat: 48.7758, lon: 9.1829, assignedTo: null },
@@ -535,7 +525,9 @@
         saveData();
       }
 
-      missions = m ? JSON.parse(m) : [];
+      missions = storedMissions ? JSON.parse(storedMissions) : [];
+      
+      // Sicherheitsnetz: alte Datensätze ergänzen
       vehicles.forEach(x => { 
         if (x.assignedTo === undefined) x.assignedTo = null;
         if (!x.telefon) x.telefon = '';
@@ -548,20 +540,21 @@
     }
 
     // ============================================================
-    //  MARKER & DRAG & DROP
+    //  MARKER
     // ============================================================
-    function enableDraggableMarkers() {
-      // Leeres Event-Listener-System für Marker
-      map.on('dragstart', () => {
-        document.getElementById('drag-overlay').classList.add('active');
+    function drawAllMarkers() {
+      // Nur Fahrzeuge mit Koordinaten zeichnen
+      vehicles.filter(v => v.lat != null && v.lon != null).forEach(v => {
+        if (!homeMarkers[v.id]) placeHomeMarker(v);
       });
-      
-      map.on('dragend', () => {
-        document.getElementById('drag-overlay').classList.remove('active');
+      missions.forEach(m => {
+        if (!missionMarkers[m.id]) placeMissionMarker(m);
       });
     }
 
     function placeHomeMarker(vehicle, forceRedraw = false) {
+      if (!vehicle.lat || !vehicle.lon) return;
+      
       const pos = [vehicle.lat, vehicle.lon];
 
       if (homeMarkers[vehicle.id] && !forceRedraw) {
@@ -581,15 +574,11 @@
         .addTo(map)
         .bindTooltip(getHomeTooltip(vehicle), { direction: 'top' });
 
-      // Drag Events
       homeMarkers[vehicle.id].on('dragend', async (e) => {
         const target = e.target;
         const latlng = target.getLatLng();
-        
-        // Rückwärts-Geocoding für neue Adresse
         const addr = await reverseGeocode(latlng.lat, latlng.lng);
         
-        // Fahrzeug updaten
         const v = vehicles.find(x => x.id === vehicle.id);
         if (v) {
           v.lat = latlng.lat;
@@ -597,20 +586,12 @@
           if (addr) v.geraetehaus = addr;
           saveData();
           renderVehicleList();
-          
-          // Tooltip aktualisieren
           target.setTooltipContent(getHomeTooltip(v));
-          
-          if (selectedLat && selectedLon) {
-            calculateAndShowRoute();
-          }
+          if (selectedLat && selectedLon) calculateAndShowRoute();
         }
       });
 
-      // Klick auf Marker öffnet Modal
-      homeMarkers[vehicle.id].on('click', () => {
-        openModal(vehicle.id);
-      });
+      homeMarkers[vehicle.id].on('click', () => openModal(vehicle.id));
     }
 
     function getHomeTooltip(vehicle) {
@@ -649,10 +630,17 @@
     async function geocode(query) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
       const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error('Geocoding fehlgeschlagen');
+
+      if (res.status === 403) {
+        throw new Error('Geocoding-Dienst blockiert (403). Bitte über http://localhost oder GitHub Pages starten.');
+      }
+      if (res.status === 429) {
+        throw new Error('Zu viele Anfragen (429). Bitte warten.');
+      }
+      if (!res.ok) throw new Error('Geocoding fehlgeschlagen (' + res.status + ')');
+
       const data = await res.json();
-      if (!data.length) return null;
-      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name };
+      return data.length ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name } : null;
     }
 
     async function reverseGeocode(lat, lon) {
@@ -696,25 +684,16 @@
     }
 
     // ============================================================
-    //  ROUTENBERECHNUNG (OSRM)
+    //  ROUTENBERECHNUNG
     // ============================================================
     async function calculateAndShowRoute() {
-      if (!selectedLat || !selectedLon) {
-        clearRoute();
-        return;
-      }
+      if (!selectedLat || !selectedLon) { clearRoute(); return; }
 
       const vehicleId = document.getElementById('vehicle-select').value;
-      if (!vehicleId) {
-        clearRoute();
-        return;
-      }
+      if (!vehicleId) { clearRoute(); return; }
 
       const vehicle = vehicles.find(v => v.id === vehicleId);
-      if (!vehicle || vehicle.status !== 'einsatzbereit' || vehicle.assignedTo) {
-        clearRoute();
-        return;
-      }
+      if (!vehicle || vehicle.status !== 'einsatzbereit' || vehicle.assignedTo) { clearRoute(); return; }
 
       selectedVehicleForRouting = vehicleId;
 
@@ -730,34 +709,25 @@
         const distanceKm = (route.distance / 1000).toFixed(1);
         const durationMin = Math.round(route.duration / 60);
         
-        const geojson = route.geometry;
-        const latLngs = geojson.coordinates.map(coord => [coord[1], coord[0]]);
+        const latLngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
         
-        if (routeLines['preview']) {
-          map.removeLayer(routeLines['preview']);
-        }
-        
-        routeLines['preview'] = L.polyline(latLngs, {
-          color: '#6d4aff',
-          weight: 5,
-          opacity: 0.7,
-          dashArray: '10, 10'
-        }).addTo(map);
+        if (routeLines['preview']) map.removeLayer(routeLines['preview']);
+        routeLines['preview'] = L.polyline(latLngs, { color: '#6d4aff', weight: 5, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
 
         const infoDiv = document.getElementById('route-info');
         infoDiv.innerHTML = `🛣️ <strong>Route:</strong> ${distanceKm} km · ca. ${durationMin} min Fahrzeit`;
         infoDiv.classList.add('visible');
-        
         map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
-        
-      } catch (err) {
-        console.warn('Routing:', err);
+      } catch {
         const infoDiv = document.getElementById('route-info');
         infoDiv.innerHTML = `ℹ️ Luftlinien-Distanz: ${haversine(vehicle.lat, vehicle.lon, selectedLat, selectedLon).toFixed(1)} km`;
         infoDiv.classList.add('visible');
       }
     }
 
+    // ============================================================
+    //  FAHRZEUGAUSWAHL (FIX: Mehrere parallele Einsätze möglich)
+    // ============================================================
     function fillVehicleOptions(lat, lon) {
       const select = document.getElementById('vehicle-select');
 
@@ -767,6 +737,7 @@
         return;
       }
 
+      // FIX: Nur einsatzbereit UND nicht gerade in diesem Moment im Einsatz
       const verfuegbar = vehicles
         .filter(v => v.status === 'einsatzbereit' && !v.assignedTo)
         .map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) }))
@@ -790,22 +761,18 @@
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) ** 2;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     // ============================================================
-    //  STATISTIKEN (DASHBOARD)
+    //  STATISTIKEN
     // ============================================================
     function renderStats() {
       const total = vehicles.length;
       const ready = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo).length;
       const active = vehicles.filter(v => v.assignedTo).length;
-      
-      const today = new Date().toDateString();
-      const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === today).length;
+      const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
 
       document.getElementById('stat-total').textContent = total;
       document.getElementById('stat-ready').textContent = ready;
@@ -872,6 +839,9 @@
       renderHistory();
     }
 
+    // ============================================================
+    //  EINSATZ BEENDEN (FIX: Fahrzeuge werden wieder verfügbar)
+    // ============================================================
     function endMission(vehicleId) {
       const vehicle = vehicles.find(v => v.id === vehicleId);
       if (!vehicle || !vehicle.assignedTo) return;
@@ -887,24 +857,28 @@
         map.removeLayer(missionMarkers[missionId]);
         delete missionMarkers[missionId];
       }
-      if (routeLines[missionId]) {
-        map.removeLayer(routeLines[missionId]);
-        delete routeLines[missionId];
-      }
 
       missions = missions.filter(m => m.id !== missionId);
+      
+      // FIX: Fahrzeug wieder als frei setzen
       vehicle.assignedTo = null;
+      
       saveData();
 
+      // FIX: Alle UI-Elemente aktualisieren
       renderStats();
       renderVehicleList();
       renderHistory();
+      
+      // FIX: Dropdown aktualisieren (falls gerade offen)
+      if (selectedLat && selectedLon) {
+        fillVehicleOptions(selectedLat, selectedLon);
+      }
     }
 
     function clearMission() {
       document.getElementById('mission-address').value = '';
-      document.getElementById('vehicle-select').innerHTML =
-        '<option value="">-- Zuerst Einsatzadresse festlegen --</option>';
+      document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>';
       selectedLat = null;
       selectedLon = null;
       removePreviewMarker();
@@ -912,7 +886,7 @@
     }
 
     // ============================================================
-    //  VEHICLE LIST & SEARCH
+    //  FAHRZEUCLISTE
     // ============================================================
     function renderVehicleList(filterQuery = '') {
       const container = document.getElementById('vehicle-list');
@@ -1007,8 +981,7 @@
     }
 
     function toggleHistory() {
-      const panel = document.getElementById('history-panel');
-      panel.classList.toggle('expanded');
+      document.getElementById('history-panel').classList.toggle('expanded');
     }
 
     function exportHistory() {
@@ -1079,20 +1052,15 @@
       document.getElementById('modal').classList.remove('active');
       document.getElementById('drag-overlay').textContent = '📍 Standort auf der Karte anklicken';
       document.getElementById('drag-overlay').classList.add('active');
-      
-      // Hinweis: Klick auf Karte setzt Standort
       alert('Klicken Sie nun auf der Karte auf den gewünschten Standort.\nDie Adresse wird automatisch erkannt.');
     }
 
     function handleDrillClick(lat, lon) {
       drillModeActive = false;
       document.getElementById('drag-overlay').classList.remove('active');
-      
-      // Geocoding für Adresse
       (async () => {
         const addr = await reverseGeocode(lat, lon);
-        openModal(null); // Neues Fahrzeug
-        
+        openModal(null);
         document.getElementById('form-geraetehaus').value = addr || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
         document.getElementById('form-geraetehaus').dataset.tempLat = lat;
         document.getElementById('form-geraetehaus').dataset.tempLon = lon;
@@ -1110,9 +1078,9 @@
     async function saveVehicle() {
       const geraetehaus = document.getElementById('form-geraetehaus').value.trim();
       const fahrzeugTyp = document.getElementById('form-fahrzeugtyp').value;
-      const rufname     = document.getElementById('form-rufname').value.trim();
-      const telefon    = document.getElementById('form-telefon').value.trim();
-      const status      = document.getElementById('form-status').value;
+      const rufname = document.getElementById('form-rufname').value.trim();
+      const telefon = document.getElementById('form-telefon').value.trim();
+      const status = document.getElementById('form-status').value;
 
       if (!geraetehaus || !rufname) return alert('Bitte Standortadresse und Funkrufname ausfüllen.');
 
@@ -1120,7 +1088,6 @@
       let lat = editing ? editing.lat : null;
       let lon = editing ? editing.lon : null;
 
-      // Temporäre Koordinaten aus Drill-Mode verwenden
       const tempLat = document.getElementById('form-geraetehaus').dataset.tempLat;
       const tempLon = document.getElementById('form-geraetehaus').dataset.tempLon;
       
@@ -1130,27 +1097,17 @@
       } else if (!editing || editing.geraetehaus !== geraetehaus) {
         try {
           const hit = await geocode(geraetehaus);
-          if (hit) {
-            lat = hit.lat;
-            lon = hit.lon;
-          } else if (!editing) {
-            return alert('Adresse nicht gefunden. Bitte Schreibweise prüfen.');
-          } else {
-            alert('Adresse konnte nicht neu ermittelt werden – bisherige Koordinaten bleiben.');
-          }
+          if (hit) { lat = hit.lat; lon = hit.lon; }
+          else if (!editing) return alert('Adresse nicht gefunden.');
         } catch {
-          if (!editing) return alert('Geocoding nicht möglich (Netzwerk/Offline?).');
+          if (!editing) return alert('Geocoding nicht möglich.');
         }
       }
 
       if (editing) {
         Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon });
       } else {
-        vehicles.push({
-          id: 'v' + Date.now(),
-          geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon,
-          assignedTo: null
-        });
+        vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon, assignedTo: null });
       }
 
       saveData();
@@ -1167,10 +1124,7 @@
       if (!confirm(`Fahrzeug "${v.rufname}" wirklich löschen?`)) return;
 
       vehicles = vehicles.filter(x => x.id !== id);
-      if (homeMarkers[id]) {
-        map.removeLayer(homeMarkers[id]);
-        delete homeMarkers[id];
-      }
+      if (homeMarkers[id]) { map.removeLayer(homeMarkers[id]); delete homeMarkers[id]; }
       saveData();
       renderVehicleList();
       if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
@@ -1185,9 +1139,7 @@
     }
 
     function escapeHtml(str) {
-      return String(str ?? '').replace(/[&<>"']/g, c => (
-        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-      ));
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
   </script>
 </body>
