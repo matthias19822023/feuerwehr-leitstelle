@@ -167,14 +167,13 @@
     .btn-delete { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; }
     .btn-drill { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; margin-right: auto; }
 
-    /* ========== MARKERS - FIX: Bessere Sichtbarkeit auf allen Layers ========== */
+    /* ========== MARKERS ========== */
     .marker-wrapper {
       display: inline-block;
       position: relative;
       font-size: 28px;
       line-height: 1;
       text-align: center;
-      filter: none !important; /* DROP-SHADOW entfernt für bessere Sichtbarkeit */
       z-index: 1000 !important;
     }
     
@@ -223,16 +222,37 @@
     }
     .drag-overlay.active { opacity: 1; }
 
-    /* Debug-Info für Fahrzeuglisten */
-    .debug-info {
-      font-size: 11px;
-      color: #888;
-      padding: 4px 8px;
+    /* ========== DEBUG PANEL ========== */
+    #debug-panel {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
       background: #fef3c7;
-      border-bottom: 1px solid #fcd34d;
+      border: 2px solid #f59e0b;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      max-width: 400px;
+      max-height: 30vh;
+      overflow-y: auto;
+      z-index: 9999;
+      font-family: monospace;
       display: none;
     }
-    .debug-info.visible { display: block; }
+    #debug-panel.visible { display: block; }
+    #debug-toggle {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: #6b7280;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      z-index: 10000;
+      cursor: pointer;
+    }
 
     @media (max-width: 820px) {
       #map { height: 38vh; }
@@ -245,8 +265,9 @@
 </head>
 <body>
 
-  <!-- Debug Info -->
-  <div id="debug-info" class="debug-info"></div>
+  <!-- Debug Toggle Button -->
+  <button id="debug-toggle" onclick="toggleDebug()">🔧 Debug</button>
+  <div id="debug-panel"></div>
 
   <!-- ========== DASHBOARD ========== -->
   <div id="dashboard">
@@ -312,21 +333,19 @@
       <button id="add-btn" onclick="openModal()">+ Neues Fahrzeug</button>
     </div>
     
-    <!-- Search Bar -->
     <div class="search-bar">
-      <input type="text" id="vehicle-search" class="search-input" placeholder="🔍 Suche: Rufname, Typ, Adresse, Telefon..." oninput="filterVehicles()">
+      <input type="text" id="vehicle-search" class="search-input" placeholder="🔍 Suche..." oninput="filterVehicles()">
     </div>
     
     <div id="vehicle-list"></div>
   </div>
 
-  <!-- ========== HISTORY TOGGLE ========== -->
+  <!-- ========== HISTORY PANEL ========== -->
   <div id="history-toggle" onclick="toggleHistory()">
     <span>📋 Einsatzhistorie</span>
     <span>▼</span>
   </div>
 
-  <!-- ========== HISTORY PANEL ========== -->
   <div id="history-panel">
     <div id="history-scroll">
       <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
@@ -386,7 +405,7 @@
       </div>
 
       <div class="form-actions">
-        <button class="btn-drill" onclick="openDrillMode()" title="Auf der Karte einen Standort anklicken">📍 Standort setzen</button>
+        <button class="btn-drill" onclick="openDrillMode()">📍 Standort setzen</button>
         <button class="btn-delete" id="delete-btn" onclick="deleteVehicleFromModal()" style="display:none;">Löschen</button>
         <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
         <button class="btn-save" onclick="saveVehicle()">Speichern</button>
@@ -395,10 +414,16 @@
   </div>
 
   <script>
+    // ============================================================
+    //  KONFIGURATION
+    // ============================================================
     const FAHRZEUGTYPEN = ['ELW 1', 'HLF10', 'HLF20', 'LF10', 'LF20', 'TSF', 'TSF-W', 'TLF16/25', 'TLF8/8', 'FwA-ÖSA', 'FwA-GTR', 'DLK', 'MTW', 'Argo8*8', 'MZF'];
-    const STORAGE_VEHICLES = 'fw_vehicles_v6';
-    const STORAGE_MISSIONS  = 'fw_missions_v6';
+    const STORAGE_VEHICLES = 'fw_vehicles_v7';
+    const STORAGE_MISSIONS  = 'fw_missions_v7';
 
+    // ============================================================
+    //  STATE
+    // ============================================================
     let map;
     let vehicles = [];
     let missions = [];
@@ -410,48 +435,69 @@
     let selectedLat = null;
     let selectedLon = null;
     let geocodeTimer = null;
-    let selectedVehicleForRouting = null;
     let currentLayer = 'osm';
     let drillModeActive = false;
 
     const tileLayers = {
-      osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap-Mitwirkende' }),
+      osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
       sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }),
       dark: L.tileLayer('https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' })
     };
 
-    // ========== DEBUG ==========
-    function debug(...args) {
-      const el = document.getElementById('debug-info');
-      const msg = `[DEBUG] ${args.join(' ')}`;
-      console.log(msg);
-      el.textContent = msg;
-      el.classList.add('visible');
+    // ============================================================
+    //  DEBUG
+    // ============================================================
+    function toggleDebug() {
+      document.getElementById('debug-panel').classList.toggle('visible');
     }
 
-    // ========== INIT ==========
+    function log(...args) {
+      const msg = args.join(' ');
+      console.log(msg);
+      const panel = document.getElementById('debug-panel');
+      panel.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
     document.addEventListener('DOMContentLoaded', async () => {
-      debug('Initialisierung gestartet...');
+      log('=== START Initialisierung ===');
       fillTypeDropdowns();
-      
       loadData();
-      debug(`Fahrzeuge geladen: ${vehicles.length}`);
+      
+      // Log aller Fahrzeuge mit Status
+      log(`📊 Fahrzeuge insgesamt: ${vehicles.length}`);
+      vehicles.forEach(v => {
+        log(`  - ${v.rufname}: status="${v.status}", lat=${v.lat}, lon=${v.lon}, assignedTo=${v.assignedTo}`);
+      });
       
       initMap();
-      debug('Map initialisiert');
-      
       drawAllMarkers();
-      debug('Marker gezeichnet');
-      
       renderVehicleList();
-      debug('Fahrzeugliste gerendert');
-      
       renderStats();
       renderHistory();
       bindMissionInput();
       
-      debug('Initialisierung abgeschlossen');
+      log('=== END Initialisierung ===');
+      
+      // Test: Prüfe Fahrzeugliste für Dropdown (ohne Adresse)
+      testVehicleAvailability();
     });
+
+    function testVehicleAvailability() {
+      const available = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo);
+      const withCoords = available.filter(v => v.lat && v.lon);
+      log(`🚗 Einsatzbereit (alle): ${available.length}`);
+      log(`🚗 Mit Koordinaten: ${withCoords.length}`);
+      if (withCoords.length > 0) {
+        log('✅ Fahrzeuge verfügbar für Auswahl!');
+        withCoords.forEach(v => log(`   ✓ ${v.rufname} (${v.fahrzeugTyp})`));
+      } else {
+        log('❌ KEINE Fahrzeuge in Auswahl (Prüfe Status/Koordinaten)');
+      }
+    }
 
     function fillTypeDropdowns() {
       document.getElementById('form-fahrzeugtyp').innerHTML = FAHRZEUGTYPEN.map(t => `<option value="${t}">${t}</option>`).join('');
@@ -470,7 +516,7 @@
         removePreviewMarker();
         
         missionMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-          icon: L.divIcon({ className: 'marker-wrapper mission-marker', html: '🎯' })
+          icon: L.divIcon({ className: 'marker-wrapper mission-marker', html: '🎯', iconSize: [32, 32], iconAnchor: [16, 32] })
         }).addTo(map);
 
         const addr = await reverseGeocode(e.latlng.lat, e.latlng.lng);
@@ -514,7 +560,7 @@
 
       if (storedV) {
         vehicles = JSON.parse(storedV);
-        debug('Fahrzeuge aus localStorage geladen');
+        log('✅ Fahrzeuge aus localStorage geladen');
       } else {
         vehicles = [
           { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', lat: 48.7758, lon: 9.1829, assignedTo: null },
@@ -522,20 +568,26 @@
           { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '07141 112233', status: 'nicht_einsatzbereit', lat: 48.8974, lon: 9.1916, assignedTo: null }
         ];
         saveData();
-        debug('Demo-Daten erstellt');
+        log('✨ Demo-Daten erstellt');
       }
 
       missions = storedM ? JSON.parse(storedM) : [];
-      vehicles.forEach(x => { if (x.assignedTo === undefined) x.assignedTo = null; if (!x.telefon) x.telefon = ''; });
+      vehicles.forEach(x => { 
+        if (x.assignedTo === undefined) x.assignedTo = null;
+        if (!x.telefon) x.telefon = '';
+        if (x.lat === undefined) x.lat = null;
+        if (x.lon === undefined) x.lon = null;
+      });
     }
 
     function saveData() {
       localStorage.setItem(STORAGE_VEHICLES, JSON.stringify(vehicles));
       localStorage.setItem(STORAGE_MISSIONS, JSON.stringify(missions));
+      log('💾 Daten gespeichert');
     }
 
     function drawAllMarkers() {
-      debug(`Zeige ${vehicles.filter(v => v.lat && v.lon).length} Fahrzeug-Marker auf Karte`);
+      log(`📍 Zeige ${vehicles.filter(v => v.lat && v.lon).length} Fahrzeug-Marker auf Karte`);
       vehicles.filter(v => v.lat != null && v.lon != null).forEach(v => {
         if (!homeMarkers[v.id]) placeHomeMarker(v);
       });
@@ -543,7 +595,7 @@
     }
 
     function placeHomeMarker(vehicle, forceRedraw = false) {
-      if (!vehicle.lat || !vehicle.lon) return;
+      if (!vehicle.lat || !vehicle.lon) { log(`⚠️ ${vehicle.rufname} hat keine Koordinaten, überspringen`); return; }
       const pos = [vehicle.lat, vehicle.lon];
 
       if (homeMarkers[vehicle.id] && !forceRedraw) {
@@ -555,8 +607,7 @@
         className: 'marker-wrapper building-marker', 
         html: '🏠', 
         iconSize: [32, 32], 
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+        iconAnchor: [16, 32]
       });
 
       homeMarkers[vehicle.id] = L.marker(pos, { icon, draggable: true })
@@ -655,12 +706,66 @@
       }
     }
 
+    // ============================================================
+    //  FAHRZEUGAUSWAHL - MIT AUSFÜHRLICHEM DEBUGGING
+    // ============================================================
     function fillVehicleOptions(lat, lon) {
+      log('=== fillVehicleOptions aufgerufen ===');
+      log(`Parameter: lat=${lat}, lon=${lon}`);
+      
       const select = document.getElementById('vehicle-select');
-      if (lat == null || lon == null) { select.innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; clearRoute(); return; }
-      const verfuegbar = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo).map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) })).sort((a, b) => a.dist - b.dist);
-      if (!verfuegbar.length) { select.innerHTML = '<option value="">-- Kein freies Fahrzeug --</option>'; clearRoute(); return; }
-      select.innerHTML = '<option value="">-- Fahrzeug wählen --</option>' + verfuegbar.map(({ v, dist }) => `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`).join('');
+
+      if (lat == null || lon == null) {
+        select.innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>';
+        clearRoute();
+        return;
+      }
+
+      // Schritt-für-Schritt Filterlogik
+      const allVehicles = vehicles.length;
+      const einsatzbereit = vehicles.filter(v => v.status === 'einsatzbereit').length;
+      const nichtAssigned = vehicles.filter(v => !v.assignedTo).length;
+      const mitKoordinaten = vehicles.filter(v => v.lat && v.lon).length;
+      
+      log(`📊 Filter-Stufe 1 (Status=einsatzbereit): ${einsatzbereit}/${allVehicles}`);
+      log(`📊 Filter-Stufe 2 (!assignedTo): ${nichtAssigned}/${allVehicles}`);
+      log(`📊 Filter-Stufe 3 (lat+lon vorhanden): ${mitKoordinaten}/${allVehicles}`);
+
+      const verfuegbar = vehicles
+        .filter(v => {
+          const passStatus = v.status === 'einsatzbereit';
+          const passAssigned = !v.assignedTo;
+          const passCoords = v.lat != null && v.lon != null;
+          const passesAll = passStatus && passAssigned && passCoords;
+          
+          if (passesAll) {
+            log(`   ✓ ${v.rufname}: status="${v.status}", assignedTo=${v.assignedTo}, coords=[${v.lat},${v.lon}]`);
+          }
+          
+          return passesAll;
+        })
+        .map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) }))
+        .sort((a, b) => a.dist - b.dist);
+
+      log(`📊 Ergebnis nach Filter: ${verfuegbar.length} Fahrzeuge`);
+
+      if (!verfuegbar.length) {
+        const reasons = [];
+        if (vehicles.filter(v => v.status !== 'einsatzbereit').length) reasons.push('Status nicht "einsatzbereit"');
+        if (vehicles.filter(v => v.assignedTo).length) reasons.push('In einem Einsatz');
+        if (vehicles.filter(v => !v.lat || !v.lon).length) reasons.push('Keine Koordinaten');
+        
+        log('⚠️ Keine Fahrzeuge verfügbar. Gründe:', reasons.join(', ') || 'Unbekannt');
+        select.innerHTML = '<option value="">-- Kein freies Fahrzeug verfügbar --</option>';
+        clearRoute();
+        return;
+      }
+
+      select.innerHTML = '<option value="">-- Fahrzeug wählen --</option>' + verfuegbar.map(({ v, dist }) => 
+        `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`
+      ).join('');
+
+      log(`✅ ${verfuegbar.length} Fahrzeuge im Dropdown geladen`);
       select.onchange = () => calculateAndShowRoute();
     }
 
@@ -671,12 +776,16 @@
     }
 
     function renderStats() {
-      const total = vehicles.length, ready = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo).length, active = vehicles.filter(v => v.assignedTo).length;
+      const total = vehicles.length;
+      const ready = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo).length;
+      const active = vehicles.filter(v => v.assignedTo).length;
       const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
+      
       document.getElementById('stat-total').textContent = total;
       document.getElementById('stat-ready').textContent = ready;
       document.getElementById('stat-active').textContent = active;
       document.getElementById('stat-today').textContent = todayCount;
+      
       const delta = document.getElementById('stat-ready-delta');
       delta.textContent = ready >= total ? 'Alle frei' : ready > 0 ? `${total - ready} im Einsatz` : 'Keine frei';
       delta.className = ready >= total ? 'stat-delta positive' : 'stat-delta neutral';
@@ -688,8 +797,11 @@
       if (!selectedLat || !selectedLon) return alert('Erstens Einsatzadresse festlegen.');
       if (!vehicleId) return alert('Bitte Fahrzeug auswählen.');
       const vehicle = vehicles.find(v => v.id === vehicleId);
-      if (!vehicle || vehicle.assignedTo) return alert('Fahrzeug belegt.');
+      if (!vehicle) return alert('Fahrzeug nicht gefunden.');
+      if (vehicle.assignedTo) return alert('Fahrzeug belegt.');
 
+      log(`🚨 ALARM: ${vehicle.rufname} nach ${address}`);
+      
       const mission = { id: 'm' + Date.now(), address, lat: selectedLat, lon: selectedLon, vehicleId, createdAt: new Date().toISOString(), completedAt: null };
       missions.push(mission);
       vehicle.assignedTo = mission.id;
@@ -699,6 +811,7 @@
       setTimeout(() => missionMarkers[mission.id]?.getElement()?.classList.remove('jump-animation'), 700);
       map.flyTo([mission.lat, mission.lon], 15);
       clearRoute(); clearMission(); renderStats(); renderVehicleList(); renderHistory();
+      testVehicleAvailability();
     }
 
     function endMission(vehicleId) {
@@ -710,8 +823,10 @@
       if (missionMarkers[missionId]) { map.removeLayer(missionMarkers[missionId]); delete missionMarkers[missionId]; }
       missions = missions.filter(m => m.id !== missionId);
       vehicle.assignedTo = null;
+      log(`✅ Einsatz beendet: ${vehicle.rufname} wieder verfügbar`);
       saveData();
       renderStats(); renderVehicleList(); renderHistory();
+      testVehicleAvailability();
       if (selectedLat && selectedLon) fillVehicleOptions(selectedLat, selectedLon);
     }
 
@@ -720,7 +835,6 @@
     function renderVehicleList(filterQuery = '') {
       const container = document.getElementById('vehicle-list');
       const query = filterQuery.toLowerCase().trim();
-      debug(`renderVehicleList: ${vehicles.length} Fahrzeuge, Query: "${query}"`);
       
       if (!vehicles.length) { container.innerHTML = '<div style="padding:18px;color:#888;">Noch keine Fahrzeuge.</div>'; return; }
 
@@ -829,7 +943,7 @@
       if (editing) { Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon }); }
       else { vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon, assignedTo: null }); }
 
-      saveData(); drawAllMarkers(); renderVehicleList(); closeModal();
+      saveData(); drawAllMarkers(); renderVehicleList(); closeModal(); testVehicleAvailability();
       if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
     }
 
@@ -839,7 +953,7 @@
       if (!confirm(`"${v.rufname}" löschen?`)) return;
       vehicles = vehicles.filter(x => x.id !== id);
       if (homeMarkers[id]) { map.removeLayer(homeMarkers[id]); delete homeMarkers[id]; }
-      saveData(); renderVehicleList();
+      saveData(); renderVehicleList(); testVehicleAvailability();
     }
 
     function deleteVehicleFromModal() { if (currentEditingId) { const id = currentEditingId; closeModal(); deleteVehicleById(id); } }
