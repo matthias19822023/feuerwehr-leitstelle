@@ -10,7 +10,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #333; }
 
-    /* ========== DASHBOARD ========== */
     #dashboard {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -31,7 +30,6 @@
     .stat-delta.positive { color: #4ade80; }
     .stat-delta.neutral { color: #fbbf24; }
 
-    /* ========== MAP ========== */
     #map-container { padding: 0 16px; position: relative; }
     #map { width: 100%; height: 42vh; border-radius: 8px; overflow: hidden; z-index: 1; }
     
@@ -55,7 +53,6 @@
     .map-btn:hover { background: #f5f5f5; }
     .map-btn.active { background: #6d4aff; color: #fff; border-color: #6d4aff; }
 
-    /* ========== MISSION PANEL ========== */
     #mission-panel { padding: 14px 16px; background: #fff; border-bottom: 1px solid #ddd; }
     .mission-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
     .mission-input { flex: 1; min-width: 220px; }
@@ -75,8 +72,8 @@
     .btn-alarm { background: #e74c3c; color: #fff; padding: 10px 18px; border: none; border-radius: 6px; font-weight: 600; }
     .btn-alarm:hover { background: #c0392b; }
     .btn-cancel { background: #e0e0e0; color: #333; padding: 10px 18px; border: none; border-radius: 6px; }
+    .btn-test { background: #3b82f6; color: #fff; padding: 10px 18px; border: none; border-radius: 6px; font-weight: 600; }
 
-    /* ========== VEHICLE PANEL ========== */
     #vehicle-panel { height: calc(28vh); display: flex; flex-direction: column; background: #fff; overflow: hidden; }
     .panel-header {
       padding: 11px 16px; background: #6d4aff; color: #fff;
@@ -85,7 +82,6 @@
     .panel-header h2 { font-size: 17px; font-weight: 600; }
     #add-btn { background: #fff; color: #6d4aff; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 600; }
 
-    /* ========== SEARCH BAR ========== */
     .search-bar {
       padding: 10px 16px;
       background: #f9fafb;
@@ -125,7 +121,6 @@
     .vehicle-actions button { padding: 5px 9px; border: 1px solid #ccc; background: #fff; border-radius: 5px; font-size: 13px; }
     .vehicle-actions button:hover { background: #f5f5f5; }
 
-    /* ========== HISTORY PANEL ========== */
     #history-toggle {
       padding: 8px 16px; background: #374151; color: #fff; cursor: pointer;
       display: flex; justify-content: space-between; align-items: center; font-size: 13px;
@@ -151,7 +146,6 @@
     }
     .btn-export:hover { background: #2563eb; }
 
-    /* ========== MODAL ========== */
     .modal-overlay {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
       z-index: 1000; align-items: center; justify-content: center;
@@ -167,7 +161,6 @@
     .btn-delete { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; }
     .btn-drill { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; margin-right: auto; }
 
-    /* ========== MARKERS ========== */
     .marker-wrapper {
       display: inline-block;
       position: relative;
@@ -176,7 +169,6 @@
       text-align: center;
       z-index: 1000 !important;
     }
-    
     .marker-wrapper::after {
       content: '';
       position: absolute;
@@ -190,7 +182,6 @@
       z-index: -1;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
-    
     .building-marker { font-size: 28px; }
     .vehicle-marker { font-size: 32px; }
     .mission-marker { font-size: 28px; }
@@ -203,7 +194,6 @@
     }
     .jump-animation { animation: jump .65s ease; }
 
-    /* ========== DRAG OVERLAY ========== */
     .drag-overlay {
       position: absolute;
       top: 10px;
@@ -222,37 +212,16 @@
     }
     .drag-overlay.active { opacity: 1; }
 
-    /* ========== DEBUG PANEL ========== */
-    #debug-panel {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: #fef3c7;
-      border: 2px solid #f59e0b;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 12px;
-      max-width: 400px;
-      max-height: 30vh;
-      overflow-y: auto;
-      z-index: 9999;
-      font-family: monospace;
+    #test-result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      font-size: 13px;
       display: none;
     }
-    #debug-panel.visible { display: block; }
-    #debug-toggle {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: #6b7280;
-      color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 11px;
-      z-index: 10000;
-      cursor: pointer;
-    }
+    #test-result.visible { display: block; }
 
     @media (max-width: 820px) {
       #map { height: 38vh; }
@@ -264,10 +233,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Debug Toggle Button -->
-  <button id="debug-toggle" onclick="toggleDebug()">🔧 Debug</button>
-  <div id="debug-panel"></div>
 
   <!-- ========== DASHBOARD ========== -->
   <div id="dashboard">
@@ -320,10 +285,13 @@
       </div>
 
       <div class="mission-actions">
+        <button class="btn-test" onclick="showAvailableVehicles()">🧪 Test: Alle verfügbaren Fahrzeuge</button>
         <button class="btn-alarm" onclick="alarmieren()">🚒 Alarmieren</button>
         <button class="btn-cancel" onclick="clearMission()">Zurücksetzen</button>
       </div>
     </div>
+    
+    <div id="test-result"></div>
   </div>
 
   <!-- ========== VEHICLE PANEL ========== -->
@@ -414,16 +382,10 @@
   </div>
 
   <script>
-    // ============================================================
-    //  KONFIGURATION
-    // ============================================================
     const FAHRZEUGTYPEN = ['ELW 1', 'HLF10', 'HLF20', 'LF10', 'LF20', 'TSF', 'TSF-W', 'TLF16/25', 'TLF8/8', 'FwA-ÖSA', 'FwA-GTR', 'DLK', 'MTW', 'Argo8*8', 'MZF'];
-    const STORAGE_VEHICLES = 'fw_vehicles_v7';
-    const STORAGE_MISSIONS  = 'fw_missions_v7';
+    const STORAGE_VEHICLES = 'fw_vehicles_v8';
+    const STORAGE_MISSIONS  = 'fw_missions_v8';
 
-    // ============================================================
-    //  STATE
-    // ============================================================
     let map;
     let vehicles = [];
     let missions = [];
@@ -444,35 +406,53 @@
       dark: L.tileLayer('https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' })
     };
 
-    // ============================================================
-    //  DEBUG
-    // ============================================================
-    function toggleDebug() {
-      document.getElementById('debug-panel').classList.toggle('visible');
+    // ========== TEST-FUNKTION ==========
+    function showAvailableVehicles() {
+      // Prüfe alle Fahrzeuge OHNE Adresse
+      const available = vehicles.filter(v => {
+        return v.status === 'einsatzbereit' && !v.assignedTo && v.lat != null && v.lon != null;
+      });
+
+      const resultDiv = document.getElementById('test-result');
+      
+      if (available.length === 0) {
+        const allWithStatus = vehicles.filter(v => v.status === 'einsatzbereit');
+        const withAssigned = vehicles.filter(v => v.assignedTo);
+        const withoutCoords = vehicles.filter(v => !v.lat || !v.lon);
+        
+        resultDiv.innerHTML = `
+          <strong style="color:#dc2626;">❌ Keine verfügbaren Fahrzeuge</strong><br>
+          <br>
+          Gesamt: ${vehicles.length} Fahrzeuge<br>
+          Mit Status "einsatzbereit": ${allWithStatus.length}<br>
+          Nicht im Einsatz (!assignedTo): ${vehicles.length - withAssigned.length}<br>
+          Mit Koordinaten: ${vehicles.filter(v => v.lat && v.lon).length}<br>
+          <br>
+          <strong>Mögliche Gründe:</strong><br>
+          ${allWithStatus.length === 0 ? '• Kein Fahrzeug hat Status "einsatzbereit"' : ''}
+          ${withAssigned.length > 0 ? `• ${withAssigned.length} Fahrzeug(e) sind im Einsatz (assignedTo=${withAssigned.map(v=>v.rufname).join(', ')})` : ''}
+          ${withoutCoords.length > 0 ? `• ${withoutCoords.length} Fahrzeug(e) haben keine Koordinaten (${withoutCoords.map(v=>v.rufname).join(', ')})` : ''}
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <strong style="color:#16a34a;">✅ ${available.length} Fahrzeug(e) verfügbar!</strong><br>
+          <br>
+          ${available.map(v => `
+            <strong>• ${v.rufname}</strong> (${v.fahrzeugTyp})<br>
+            Status: ${v.status} | Im Einsatz: ${v.assignedTo ? 'JA' : 'NEIN'} | Koordinaten: ${v.lat},${v.lon}
+          `).join('<br>')
+          }
+        `;
+      }
+      
+      resultDiv.classList.add('visible');
+      setTimeout(() => resultDiv.classList.remove('visible'), 30000);
     }
 
-    function log(...args) {
-      const msg = args.join(' ');
-      console.log(msg);
-      const panel = document.getElementById('debug-panel');
-      panel.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-      panel.scrollTop = panel.scrollHeight;
-    }
-
-    // ============================================================
-    //  INIT
-    // ============================================================
+    // ========== INIT ==========
     document.addEventListener('DOMContentLoaded', async () => {
-      log('=== START Initialisierung ===');
       fillTypeDropdowns();
       loadData();
-      
-      // Log aller Fahrzeuge mit Status
-      log(`📊 Fahrzeuge insgesamt: ${vehicles.length}`);
-      vehicles.forEach(v => {
-        log(`  - ${v.rufname}: status="${v.status}", lat=${v.lat}, lon=${v.lon}, assignedTo=${v.assignedTo}`);
-      });
-      
       initMap();
       drawAllMarkers();
       renderVehicleList();
@@ -480,24 +460,9 @@
       renderHistory();
       bindMissionInput();
       
-      log('=== END Initialisierung ===');
-      
-      // Test: Prüfe Fahrzeugliste für Dropdown (ohne Adresse)
-      testVehicleAvailability();
+      // Sofort testen, was verfügbar ist
+      showAvailableVehicles();
     });
-
-    function testVehicleAvailability() {
-      const available = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo);
-      const withCoords = available.filter(v => v.lat && v.lon);
-      log(`🚗 Einsatzbereit (alle): ${available.length}`);
-      log(`🚗 Mit Koordinaten: ${withCoords.length}`);
-      if (withCoords.length > 0) {
-        log('✅ Fahrzeuge verfügbar für Auswahl!');
-        withCoords.forEach(v => log(`   ✓ ${v.rufname} (${v.fahrzeugTyp})`));
-      } else {
-        log('❌ KEINE Fahrzeuge in Auswahl (Prüfe Status/Koordinaten)');
-      }
-    }
 
     function fillTypeDropdowns() {
       document.getElementById('form-fahrzeugtyp').innerHTML = FAHRZEUGTYPEN.map(t => `<option value="${t}">${t}</option>`).join('');
@@ -560,7 +525,6 @@
 
       if (storedV) {
         vehicles = JSON.parse(storedV);
-        log('✅ Fahrzeuge aus localStorage geladen');
       } else {
         vehicles = [
           { id: 'v1', geraetehaus: 'Feuerwehrstraße 1, 70173 Stuttgart', fahrzeugTyp: 'HLF20', rufname: 'Florian Stuttgart 1/44-1', telefon: '0711 2345678', status: 'einsatzbereit', lat: 48.7758, lon: 9.1829, assignedTo: null },
@@ -568,7 +532,6 @@
           { id: 'v3', geraetehaus: 'Marktplatz 1, 71634 Ludwigsburg', fahrzeugTyp: 'LF10', rufname: 'Florian Ludwigsburg 1/43-1', telefon: '07141 112233', status: 'nicht_einsatzbereit', lat: 48.8974, lon: 9.1916, assignedTo: null }
         ];
         saveData();
-        log('✨ Demo-Daten erstellt');
       }
 
       missions = storedM ? JSON.parse(storedM) : [];
@@ -583,11 +546,9 @@
     function saveData() {
       localStorage.setItem(STORAGE_VEHICLES, JSON.stringify(vehicles));
       localStorage.setItem(STORAGE_MISSIONS, JSON.stringify(missions));
-      log('💾 Daten gespeichert');
     }
 
     function drawAllMarkers() {
-      log(`📍 Zeige ${vehicles.filter(v => v.lat && v.lon).length} Fahrzeug-Marker auf Karte`);
       vehicles.filter(v => v.lat != null && v.lon != null).forEach(v => {
         if (!homeMarkers[v.id]) placeHomeMarker(v);
       });
@@ -595,7 +556,7 @@
     }
 
     function placeHomeMarker(vehicle, forceRedraw = false) {
-      if (!vehicle.lat || !vehicle.lon) { log(`⚠️ ${vehicle.rufname} hat keine Koordinaten, überspringen`); return; }
+      if (!vehicle.lat || !vehicle.lon) return;
       const pos = [vehicle.lat, vehicle.lon];
 
       if (homeMarkers[vehicle.id] && !forceRedraw) {
@@ -701,18 +662,13 @@
         map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
       } catch {
         const infoDiv = document.getElementById('route-info');
-        infoDiv.innerHTML = `ℹ️ Luftlinie: ${haversine(vehicles.find(v=>v.id===document.getElementById('vehicle-select').value)?.lat, vehicles.find(v=>v.id===document.getElementById('vehicle-select').value)?.lon, selectedLat, selectedLon).toFixed(1)} km`;
+        const v = vehicles.find(v => v.id === document.getElementById('vehicle-select').value);
+        infoDiv.innerHTML = `ℹ️ Luftlinie: ${haversine(v?.lat, v?.lon, selectedLat, selectedLon).toFixed(1)} km`;
         infoDiv.classList.add('visible');
       }
     }
 
-    // ============================================================
-    //  FAHRZEUGAUSWAHL - MIT AUSFÜHRLICHEM DEBUGGING
-    // ============================================================
     function fillVehicleOptions(lat, lon) {
-      log('=== fillVehicleOptions aufgerufen ===');
-      log(`Parameter: lat=${lat}, lon=${lon}`);
-      
       const select = document.getElementById('vehicle-select');
 
       if (lat == null || lon == null) {
@@ -721,41 +677,12 @@
         return;
       }
 
-      // Schritt-für-Schritt Filterlogik
-      const allVehicles = vehicles.length;
-      const einsatzbereit = vehicles.filter(v => v.status === 'einsatzbereit').length;
-      const nichtAssigned = vehicles.filter(v => !v.assignedTo).length;
-      const mitKoordinaten = vehicles.filter(v => v.lat && v.lon).length;
-      
-      log(`📊 Filter-Stufe 1 (Status=einsatzbereit): ${einsatzbereit}/${allVehicles}`);
-      log(`📊 Filter-Stufe 2 (!assignedTo): ${nichtAssigned}/${allVehicles}`);
-      log(`📊 Filter-Stufe 3 (lat+lon vorhanden): ${mitKoordinaten}/${allVehicles}`);
-
       const verfuegbar = vehicles
-        .filter(v => {
-          const passStatus = v.status === 'einsatzbereit';
-          const passAssigned = !v.assignedTo;
-          const passCoords = v.lat != null && v.lon != null;
-          const passesAll = passStatus && passAssigned && passCoords;
-          
-          if (passesAll) {
-            log(`   ✓ ${v.rufname}: status="${v.status}", assignedTo=${v.assignedTo}, coords=[${v.lat},${v.lon}]`);
-          }
-          
-          return passesAll;
-        })
+        .filter(v => v.status === 'einsatzbereit' && !v.assignedTo && v.lat != null && v.lon != null)
         .map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) }))
         .sort((a, b) => a.dist - b.dist);
 
-      log(`📊 Ergebnis nach Filter: ${verfuegbar.length} Fahrzeuge`);
-
       if (!verfuegbar.length) {
-        const reasons = [];
-        if (vehicles.filter(v => v.status !== 'einsatzbereit').length) reasons.push('Status nicht "einsatzbereit"');
-        if (vehicles.filter(v => v.assignedTo).length) reasons.push('In einem Einsatz');
-        if (vehicles.filter(v => !v.lat || !v.lon).length) reasons.push('Keine Koordinaten');
-        
-        log('⚠️ Keine Fahrzeuge verfügbar. Gründe:', reasons.join(', ') || 'Unbekannt');
         select.innerHTML = '<option value="">-- Kein freies Fahrzeug verfügbar --</option>';
         clearRoute();
         return;
@@ -765,7 +692,6 @@
         `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`
       ).join('');
 
-      log(`✅ ${verfuegbar.length} Fahrzeuge im Dropdown geladen`);
       select.onchange = () => calculateAndShowRoute();
     }
 
@@ -800,8 +726,6 @@
       if (!vehicle) return alert('Fahrzeug nicht gefunden.');
       if (vehicle.assignedTo) return alert('Fahrzeug belegt.');
 
-      log(`🚨 ALARM: ${vehicle.rufname} nach ${address}`);
-      
       const mission = { id: 'm' + Date.now(), address, lat: selectedLat, lon: selectedLon, vehicleId, createdAt: new Date().toISOString(), completedAt: null };
       missions.push(mission);
       vehicle.assignedTo = mission.id;
@@ -811,7 +735,6 @@
       setTimeout(() => missionMarkers[mission.id]?.getElement()?.classList.remove('jump-animation'), 700);
       map.flyTo([mission.lat, mission.lon], 15);
       clearRoute(); clearMission(); renderStats(); renderVehicleList(); renderHistory();
-      testVehicleAvailability();
     }
 
     function endMission(vehicleId) {
@@ -823,14 +746,17 @@
       if (missionMarkers[missionId]) { map.removeLayer(missionMarkers[missionId]); delete missionMarkers[missionId]; }
       missions = missions.filter(m => m.id !== missionId);
       vehicle.assignedTo = null;
-      log(`✅ Einsatz beendet: ${vehicle.rufname} wieder verfügbar`);
       saveData();
       renderStats(); renderVehicleList(); renderHistory();
-      testVehicleAvailability();
       if (selectedLat && selectedLon) fillVehicleOptions(selectedLat, selectedLon);
     }
 
-    function clearMission() { document.getElementById('mission-address').value = ''; document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); }
+    function clearMission() { 
+      document.getElementById('mission-address').value = ''; 
+      document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; 
+      selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); 
+      document.getElementById('test-result').classList.remove('visible');
+    }
 
     function renderVehicleList(filterQuery = '') {
       const container = document.getElementById('vehicle-list');
@@ -943,7 +869,7 @@
       if (editing) { Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon }); }
       else { vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, lat, lon, assignedTo: null }); }
 
-      saveData(); drawAllMarkers(); renderVehicleList(); closeModal(); testVehicleAvailability();
+      saveData(); drawAllMarkers(); renderVehicleList(); closeModal(); showAvailableVehicles();
       if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
     }
 
@@ -953,7 +879,7 @@
       if (!confirm(`"${v.rufname}" löschen?`)) return;
       vehicles = vehicles.filter(x => x.id !== id);
       if (homeMarkers[id]) { map.removeLayer(homeMarkers[id]); delete homeMarkers[id]; }
-      saveData(); renderVehicleList(); testVehicleAvailability();
+      saveData(); renderVehicleList(); showAvailableVehicles();
     }
 
     function deleteVehicleFromModal() { if (currentEditingId) { const id = currentEditingId; closeModal(); deleteVehicleById(id); } }
