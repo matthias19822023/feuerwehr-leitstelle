@@ -1040,6 +1040,74 @@
 
     function renderHistory() {
       const tbody = document.getElementById('history-body');
-      if (!missions.length) { tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#888;">Keine Einsätze</td></tr>'; return; }
+      if (!missions.length) { 
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#888;">Keine Einsätze</td></tr>'; 
+        return; 
+      }
       const sorted = [...missions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      tbody.innerHTML = sorted
+      tbody.innerHTML = sorted.map(m => {
+        const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : null; }).filter(Boolean).join(', ');
+        const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : null; }).filter(Boolean).join(', ');
+        const created = new Date(m.createdAt);
+        const completed = m.phases && m.phases.erledigt ? new Date(m.phases.erledigt) : null;
+        const duration = completed ? Math.round((completed - created) / 60000) : null; 
+        const status = m.phases && m.phases.erledigt 
+          ? 'Erledigt' 
+          : (m.phases && m.phases.ankunft ? 'Vor Ort' : (m.phases && m.phases.abfahrt ? 'Unterwegs' : 'Alarmiert'));
+        const statusColor = (m.phases && m.phases.erledigt) ? '#2ecc71' : (m.phases && m.phases.ankunft ? '#8b5cf6' : '#e74c3c');
+        return `<tr onclick="openMissionModal('${m.id}')"><td><strong>${escapeHtml(m.missionNumber || '-')}</strong></td><td>${created.toLocaleString('de-DE')}</td><td>${escapeHtml(vehicleNames) || '-'}</td><td>${escapeHtml(vehicleTypes) || '-'}</td><td>${escapeHtml(m.address)}</td><td>${duration ?? '-'}</td><td style="color:${statusColor}">${status}</td></tr>`;
+      }).join('');
+    }
+
+    function toggleHistory() { document.getElementById('history-panel').classList.toggle('expanded'); }
+
+    function exportHistory() {
+      if (!missions.length) return alert('Keine Historie');
+      const headers = ['Einsatz-Nr', 'Datum', 'Fahrzeuge', 'Typen', 'Adresse', 'Dauer', 'Status'];
+      const rows = missions.map(m => { 
+        const created = new Date(m.createdAt), completed = m.phases && m.phases.erledigt ? new Date(m.phases.erledigt) : null;
+        const vehicleNames = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : ''; }).join('; ');
+        const vehicleTypes = (m.vehicleIds || []).map(id => { const v = vehicles.find(x => x.id === id); return v ? v.fahrzeugTyp : ''; }).join('; ');
+        const duration = completed ? Math.round((completed - created) / 60000) : '';
+        const status = m.phases && m.phases.erledigt ? 'Erledigt' : (m.phases && m.phases.ankunft ? 'Vor Ort' : (m.phases && m.phases.abfahrt ? 'Unterwegs' : 'Alarmiert'));
+        return [m.missionNumber || '', created.toISOString(), `"${vehicleNames}"`, `"${vehicleTypes}"`, `"${m.address.replace(/"/g,'""')}"`, duration, status].join(','); 
+      });
+      const blob = new Blob([headers.join(',')+'\n'+rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `einsaete_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+    }
+
+    function openModal(editId = null) {
+      currentEditingId = editId; const deleteBtn = document.getElementById('delete-btn');
+      if (editId) { const v = vehicles.find(x => x.id === editId); if (!v) return; document.getElementById('modal-title').textContent = 'Fahrzeug bearbeiten'; document.getElementById('form-geraetehaus').value = v.geraetehaus; document.getElementById('form-fahrzeugtyp').value = v.fahrzeugTyp; document.getElementById('form-rufname').value = v.rufname; document.getElementById('form-telefon').value = v.telefon || ''; document.getElementById('form-status').value = v.status; document.getElementById('form-ausruestung').value = v.ausruestung || ''; deleteBtn.style.display = 'inline-block'; }
+      else { document.getElementById('modal-title').textContent = 'Fahrzeug anlegen'; document.getElementById('form-geraetehaus').value = ''; document.getElementById('form-fahrzeugtyp').value = FAHRZEUGTYPEN[0]; document.getElementById('form-rufname').value = ''; document.getElementById('form-telefon').value = ''; document.getElementById('form-status').value = 'einsatzbereit'; document.getElementById('form-ausruestung').value = ''; deleteBtn.style.display = 'none'; }
+      drillModeActive = false; document.getElementById('modal').classList.add('active');
+    }
+
+    function openDrillMode() { currentEditingId = null; drillModeActive = true; document.getElementById('modal').classList.remove('active'); document.getElementById('drag-overlay').classList.add('active'); alert('Auf der Karte klicken'); }
+    function handleDrillClick(lat, lon) { drillModeActive = false; document.getElementById('drag-overlay').classList.remove('active'); (async () => { const addr = await reverseGeocode(lat, lon); openModal(null); document.getElementById('form-geraetehaus').value = addr || `${lat.toFixed(5)}, ${lon.toFixed(5)}`; document.getElementById('form-geraetehaus').dataset.tempLat = lat; document.getElementById('form-geraetehaus').dataset.tempLon = lon; })(); }
+    function closeModal() { document.getElementById('modal').classList.remove('active'); currentEditingId = null; drillModeActive = false; }
+
+    async function saveVehicle() {
+      const geraetehaus = document.getElementById('form-geraetehaus').value.trim();
+      const fahrzeugTyp = document.getElementById('form-fahrzeugtyp').value;
+      const rufname = document.getElementById('form-rufname').value.trim();
+      const telefon = document.getElementById('form-telefon').value.trim();
+      const status = document.getElementById('form-status').value;
+      const ausruestung = document.getElementById('form-ausruestung').value.trim();
+      if (!geraetehaus || !rufname) return alert('Pflichtfelder ausfüllen!');
+      const editing = currentEditingId ? vehicles.find(v => v.id === currentEditingId) : null;
+      let lat = editing?.lat ?? null, lon = editing?.lon ?? null;
+      const tempLat = document.getElementById('form-geraetehaus').dataset.tempLat;
+      const tempLon = document.getElementById('form-geraetehaus').dataset.tempLon;
+      if (tempLat && tempLon) { lat = parseFloat(tempLat); lon = parseFloat(tempLon); }
+      else if (!editing || editing.geraetehaus !== geraetehaus) { try { const hit = await geocode(geraetehaus); if (hit) { lat = hit.lat; lon = hit.lon; } else if (!editing) return alert('Adresse nicht gefunden.'); } catch { if (!editing) return alert('Geocoding fehlgeschlagen.'); } }
+      if (editing) { Object.assign(editing, { geraetehaus, fahrzeugTyp, rufname, telefon, status, ausruestung, lat, lon }); } else { vehicles.push({ id: 'v' + Date.now(), geraetehaus, fahrzeugTyp, rufname, telefon, status, ausruestung, lat, lon, assignedMissions: [] }); }
+      saveData(); drawAllMarkers(); renderVehicleList(); closeModal(); if (selectedLat != null) fillVehicleOptions(selectedLat, selectedLon);
+    }
+
+    function deleteVehicleById(id) { const v = vehicles.find(x => x.id === id); if (!v) return; const busyCount = (v.assignedMissions || []).filter(mid => { const m = missions.find(x => x.id === mid); return m && (!m.phases || !m.phases.erledigt); }).length; if (busyCount > 0) return alert(`Fahrzeug in ${busyCount} aktiven Einsatz(en).`); if (!confirm(`"${v.rufname}" löschen?`)) return; vehicles = vehicles.filter(x => x.id !== id); if (homeMarkers[id]) { map.removeLayer(homeMarkers[id]); delete homeMarkers[id]; } saveData(); renderVehicleList(); }
+    function deleteVehicleFromModal() { if (currentEditingId) { const id = currentEditingId; closeModal(); deleteVehicleById(id); } }
+    function escapeHtml(str) { return String(str ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  </script>
+</body>
+</html>
