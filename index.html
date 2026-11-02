@@ -220,6 +220,32 @@
       map = L.map('map', { zoomControl: false, zoomAnimation: true, markerZoomAnimation: true, fadeAnimation: true }).setView([54.745, 9.84], 11);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
       tileLayers.osm.addTo(map);
+
+      map.on('click', async (e) => {
+        // Modus "Standort setzen" beim Fahrzeug-Anlegen
+        if (drillModeActive) {
+          handleDrillClick(e.latlng.lat, e.latlng.lng);
+          return;
+        }
+
+        // Normalfall: Klick setzt die Einsatzadresse
+        selectedLat = e.latlng.lat;
+        selectedLon = e.latlng.lng;
+        removePreviewMarker();
+        missionMarker = L.marker([selectedLat, selectedLon], {
+          icon: makeIcon('target', '🎯'),
+          interactive: false
+        }).addTo(map);
+
+        fillVehicleOptions(selectedLat, selectedLon);
+
+        const addr = await reverseGeocode(selectedLat, selectedLon);
+        if (addr) {
+          document.getElementById('mission-address').value = addr;
+        }
+
+        calculateAndShowRoute();
+      });
     }
 
     function setLayer(layerName) {
@@ -288,12 +314,33 @@
       missions = storedM ? JSON.parse(storedM) : [];
       
       vehicles.forEach(x => { 
-        if (x.assignedTo === undefined) x.assignedTo = null; 
+        if (x.assignedMissions === undefined) {
+          if (x.assignedTo) x.assignedMissions = [x.assignedTo];
+          else x.assignedMissions = [];
+        } else if (typeof x.assignedMissions === 'string') {
+          x.assignedMissions = [x.assignedMissions];
+        }
         if (!x.telefon) x.telefon = ''; 
         if (!x.ausruestung) x.ausruestung = ''; 
         if (x.lat === undefined) x.lat = null; 
         if (x.lon === undefined) x.lon = null; 
       });
+
+      missions.forEach(m => {
+        if (!m.vehicleIds) {
+          if (m.vehicleId) m.vehicleIds = [m.vehicleId];
+          else m.vehicleIds = [];
+        }
+        if (!m.completedAt) m.completedAt = null;
+      });
+
+      // Geocoding starten, wenn Fahrzeuge ohne Koordinaten
+      
+      if (noCoords.length > 0) {
+        geocodeProgress = { current: 0, total: noCoords.length };
+        updateGeocodeProgress();
+        geocodeAllVehiclesSequential(noCoords);
+      }
       
       // Geocoding starten, wenn Fahrzeuge ohne Koordinaten
       const noCoords = vehicles.filter(v => !v.lat || !v.lon);
@@ -403,7 +450,7 @@
     function fillVehicleOptions(lat, lon) {
       const select = document.getElementById('vehicle-select');
       if (lat == null || lon == null) { select.innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; clearRoute(); return; }
-      const verfuegbar = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo && v.lat != null && v.lon != null).map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) })).sort((a, b) => a.dist - b.dist);
+      const verfuegbar = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id) && v.lat != null && v.lon != null).map(v => ({ v, dist: haversine(lat, lon, v.lat, v.lon) })).sort((a, b) => a.dist - b.dist);
       if (!verfuegbar.length) { select.innerHTML = '<option value="">-- Kein freies Fahrzeug verfügbar --</option>'; clearRoute(); return; }
       select.innerHTML = '<option value="">-- Fahrzeug wählen --</option>' + verfuegbar.map(({ v, dist }) => `<option value="${v.id}">${escapeHtml(v.rufname)} — ${dist.toFixed(1)} km — ${escapeHtml(v.fahrzeugTyp)}</option>`).join('');
       select.onchange = () => calculateAndShowRoute();
@@ -411,6 +458,18 @@
 
     function haversine(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
 
+    function haversine(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
+
+    function isVehicleBusy(vehicleId) {
+      const v = vehicles.find(x => x.id === vehicleId);
+      if (!v || !v.assignedMissions) return false;
+      return v.assignedMissions.some(mid => {
+        const m = missions.find(x => x.id === mid);
+        return m && !m.completedAt;
+      });
+    }
+
+    function generateUniqueMissionNumber() {
     function generateUniqueMissionNumber() {
       const now = new Date(); const yyyy = now.getFullYear(), mm = String(now.getMonth() + 1).padStart(2, '0'), dd = String(now.getDate()).padStart(2, '0');
       const hh = String(now.getHours()).padStart(2, '0'), min = String(now.getMinutes()).padStart(2, '0'), ss = String(now.getSeconds()).padStart(2, '0'), ms = String(now.getMilliseconds()).padStart(3, '0');
@@ -420,9 +479,13 @@
     }
 
     function renderStats() {
-      const total = vehicles.length, ready = vehicles.filter(v => v.status === 'einsatzbereit' && !v.assignedTo).length, active = vehicles.filter(v => v.assignedTo).length;
+      const total = vehicles.length;
+      const activeMissions = missions.filter(m => !m.completedAt).length;
       const todayCount = missions.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
-      document.getElementById('stat-total').textContent = total; document.getElementById('stat-ready').textContent = ready; document.getElementById('stat-active').textContent = active; document.getElementById('stat-today').textContent = todayCount;
+      const vehiclesInMission = vehicles.filter(v => isVehicleBusy(v.id)).length;
+      const ready = vehicles.filter(v => v.status === 'einsatzbereit' && !isVehicleBusy(v.id)).length;
+
+      document.getElementById('stat-active').textContent = activeMission; document.getElementById('stat-ready').textContent = ready; document.getElementById('stat-active').textContent = active; document.getElementById('stat-today').textContent = todayCount;
       const delta = document.getElementById('stat-ready-delta'); delta.textContent = ready >= total ? 'Alle frei' : ready > 0 ? `${total - ready} im Einsatz` : 'Keine frei';
       delta.className = ready >= total ? 'stat-delta positive' : 'stat-delta neutral';
     }
@@ -430,21 +493,40 @@
     function alarmieren() {
       const vehicleId = document.getElementById('vehicle-select').value, address = document.getElementById('mission-address').value.trim();
       if (!selectedLat || !selectedLon) return alert('Erstens Einsatzadresse festlegen.'); if (!vehicleId) return alert('Bitte Fahrzeug auswählen.');
-      const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle) return alert('Fahrzeug nicht gefunden.'); if (vehicle.assignedTo) return alert('Fahrzeug belegt.');
+      const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle) return alert('Fahrzeug nicht gefunden.'); if (isVehicleBusy(vehicleId)) return alert('Fahrzeug belegt.');
       const missionNumber = generateUniqueMissionNumber();
-      const mission = { id: 'm' + Date.now(), missionNumber, address, lat: selectedLat, lon: selectedLon, vehicleId, createdAt: new Date().toISOString(), completedAt: null };
-      missions.push(mission); vehicle.assignedTo = mission.id; saveData();
+      const mission = { id: 'm' + Date.now(), missionNumber, address, lat: selectedLat, lon: selectedLon, vehicleIds: [vehicleId], createdAt: new Date().toISOString(), completedAt: null };
+      missions.push(mission);
+      vehicle.assignedMissions.push(mission.id);
+      saveData();
       placeMissionMarker(mission); missionMarkers[mission.id]?.getElement()?.classList.add('jump-animation'); setTimeout(() => missionMarkers[mission.id]?.getElement()?.classList.remove('jump-animation'), 700);
       map.flyTo([mission.lat, mission.lon], 15); clearRoute(); clearMission(); renderStats(); renderVehicleList(); renderHistory();
     }
 
     function endMission(vehicleId) {
-      const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle || !vehicle.assignedTo) return;
-      const missionId = vehicle.assignedTo, mission = missions.find(m => m.id === missionId);
-      if (mission) mission.completedAt = new Date().toISOString();
-      if (missionMarkers[missionId]) { map.removeLayer(missionMarkers[missionId]); delete missionMarkers[missionId]; }
-      vehicle.assignedTo = null; saveData(); renderStats(); renderVehicleList(); renderHistory();
+      const vehicle = vehicles.find(v => v.id === vehicleId); if (!vehicle) return;
+      if (!vehicle.assignedMissions || vehicle.assignedMissions.length === 0) return;
+      
+      const missionId = vehicle.assignedMissions[0];
+      const mission = missions.find(m => m.id === missionId);
+      
+      mission.vehicleIds = mission.vehicleIds.filter(id => id !== vehicleId);
+      vehicle.assignedMissions = vehicle.assignedMissions.filter(mid => mid !== missionId);
+      
+      if (mission.vehicleIds.length === 0) {
+        mission.completedAt = new Date().toISOString();
+        if (missionMarkers[missionId]) { map.removeLayer(missionMarkers[missionId]); delete missionMarkers[missionId]; }
+      }
+      
+      saveData(); renderStats(); renderVehicleList(); renderHistory();
+      if (missionMarkers[missionId]) { missionMarkers[missionId].setTooltipContent(getMissionTooltip(mission)); }
       if (selectedLat && selectedLon) fillVehicleOptions(selectedLat, selectedLon);
+    }
+
+    function getMissionTooltip(mission) {
+      const vehicleCount = mission.vehicleIds ? mission.vehicleIds.length : 1;
+      const vehicleNames = mission.vehicleIds.map(id => { const v = vehicles.find(x => x.id === id); return v ? v.rufname : '-'; }).join(', ');
+      return `<strong>${vehicleNames}</strong><br>${escapeHtml(mission.address)}`;
     }
 
     function clearMission() { document.getElementById('mission-address').value = ''; document.getElementById('vehicle-select').innerHTML = '<option value="">-- Zuerst Einsatzadresse festlegen --</option>'; selectedLat = null; selectedLon = null; removePreviewMarker(); clearRoute(); }
@@ -457,7 +539,8 @@
         const matches = query === '' || v.rufname.toLowerCase().includes(query) || v.fahrzeugTyp.toLowerCase().includes(query) || v.geraetehaus.toLowerCase().includes(query) || (v.telefon && v.telefon.includes(query)) || (v.ausruestung && v.ausruestung.toLowerCase().includes(query));
         const highlightClass = query && matches ? 'match' : '', hiddenClass = query && !matches ? 'hidden' : '';
         const phoneDisplay = v.telefon ? `<span class="phone-number">📞 ${escapeHtml(v.telefon)}</span>` : '';
-        return `<div class="vehicle-item ${highlightClass} ${hiddenClass}" data-id="${v.id}"><div class="vehicle-info"><div class="status-dot ${v.status}" title="${statusLabel(v.status)}"></div><div style="min-width:0;"><div class="vehicle-main">${escapeHtml(v.rufname)} ${v.assignedTo ? '<span class="badge">🚨 IM EINSATZ</span>' : ''} ${phoneDisplay}</div><div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div></div></div><div class="vehicle-actions">${v.assignedTo ? `<button onclick="endMission('${v.id}')">✅ zurück</button>` : ''}<button onclick="openModal('${v.id}')">✏️</button><button onclick="deleteVehicleById('${v.id}')">🗑️</button></div></div>`;
+        return `<div class="vehicle-item ${highlightClass} ${hiddenClass}" data-id="${v.id}"><div class="vehicle-info"><div class="status-dot ${v.status}" title="${statusLabel(v.status)}"></div><div style="min-width:0;"><const busyMissions = (v.assignedMissions || []).filter(mid => { const m = missions.find(x => x.id === mid); return m && !m.completedAt; });
+        return `<div class="vehicle-item ${highlightClass} ${hiddenClass}" data-id="${v.id}"><div class="vehicle-info"><div class="status-dot ${v.status}" title="${statusLabel(v.status)}"></div><div style="min-width:0;"><div class="vehicle-main">${escapeHtml(v.rufname)} ${busyMissions.length > 0 ? '<span class="badge">🚨 ${busyMissions.length} EINSÄTZE</span>' : ''} ${phoneDisplay}</div><div class="vehicle-sub">${escapeHtml(v.fahrzeugTyp)} · ${escapeHtml(v.geraetehaus)}</div></div></div><div class="vehicle-actions">${busyMissions.length > 0 ? `<button onclick="endMission('${v.id}')">✅ zurück</button>` : ''}<button onclick="openModal('${v.id}')">✏️</button><button onclick="deleteVehicleById('${v.id}')">🗑️</button></div></div>`;
       }).join('');
     }
 
